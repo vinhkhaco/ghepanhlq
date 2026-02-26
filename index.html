@@ -1,180 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Ghép Ảnh 2130x1806 - Tỷ Lệ Chuẩn</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --panel-bg: #1e293b;
-            --border-color: #334155;
-            --accent-color: #3b82f6;
-            --text-main: #f8fafc;
-            --gold: #d4af37;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* ----- THANH ĐIỀU KHIỂN TRÁI ----- */
-        .sidebar-left {
-            width: 300px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        .sidebar-left h1 { font-size: 18px; margin: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; }
-        .control-group label { font-size: 13px; color: #94a3b8; font-weight: bold; margin-bottom: 10px; display: block; }
-
-        button {
-            background-color: transparent; color: var(--text-main);
-            border: 1px solid var(--border-color); padding: 12px;
-            border-radius: 6px; cursor: pointer; font-size: 15px;
-            transition: 0.2s; text-align: left; margin-bottom: 8px; width: 100%;
-        }
-        button:hover { background-color: rgba(59, 130, 246, 0.1); border-color: var(--accent-color); }
-        button.active { background-color: var(--accent-color); border-color: var(--accent-color); font-weight: bold; }
-
-        .btn-success { background-color: #10b981; border-color: #10b981; text-align: center; font-weight: bold; margin-top: auto; }
-        .btn-success:hover { background-color: #059669; }
-
-        /* ----- KHO ẢNH PHẢI ----- */
-        .sidebar-right {
-            width: 320px;
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--border-color);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        .sidebar-right h2 { font-size: 16px; margin: 0; color: var(--gold); }
-        
-        .search-box {
-            width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-color);
-            color: white;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        .gallery {
-            flex: 1;
-            overflow-y: auto;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            padding-right: 5px;
-            align-content: start;
-        }
-
-        .gallery::-webkit-scrollbar { width: 6px; }
-        .gallery::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-
-        .gallery-item {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 6px;
-            cursor: grab;
-            border: 2px solid transparent;
-            transition: 0.2s;
-            background-color: #0f172a;
-        }
-        .gallery-item:hover { border-color: var(--accent-color); transform: scale(1.02); }
-        .gallery-item:active { cursor: grabbing; }
-
-        /* ----- KHU VỰC LÀM VIỆC ----- */
-        .workspace {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-            overflow: hidden;
-        }
-
-        #collage-wrapper { transform-origin: center center; transition: transform 0.3s ease; }
-        
-        #collage-container {
-            width: 2130px; height: 1806px; background-color: #1a2042;
-            box-sizing: border-box; display: flex; flex-direction: column;
-            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            padding: var(--pad); gap: var(--gap);
-        }
-
-        .banners-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); height: var(--bannerH); flex-shrink: 0; }
-        .grid-row { display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr); gap: var(--gap); flex-grow: 1; }
-
-        .slot {
-            background-color: #0f172a; border: 3px solid #475569; position: relative;
-            cursor: pointer; background-size: cover; background-position: center;
-            display: flex; justify-content: center; align-items: center;
-            transition: border-color 0.2s; overflow: hidden; box-sizing: border-box;
-        }
-
-        .slot.drag-over { border-color: #10b981; background-color: rgba(16, 185, 129, 0.2); }
-        .slot:hover { border-color: var(--gold); }
-        .slot.has-image { border-color: var(--gold); }
-        .slot input { display: none; }
-        
-        .slot-text { color: rgba(255,255,255,0.4); font-size: 24px; font-weight: bold; pointer-events: none; text-shadow: 2px 2px 4px #000; text-align: center; }
-        .slot.has-image .slot-text { display: none; }
-        .slot.stats-box { background-color: #232a5e; grid-column: span var(--statsCols); grid-row: span var(--statsRows); border-style: dashed; }
-    </style>
-</head>
-<body>
-
-    <div class="sidebar-left">
-        <h1>Cấu Hình Layout</h1>
-        <div class="control-group">
-            <label>MẬT ĐỘ TƯỚNG (2130x1806)</label>
-            <button class="tpl-btn active" data-id="t17">Mẫu 17 Tướng</button>
-            <button class="tpl-btn" data-id="t45">Mẫu 45 Tướng</button>
-            <button class="tpl-btn" data-id="t100">Mẫu 100 Tướng</button>
-        </div>
-        <button id="downloadBtn" class="btn-success">⬇️ Xuất Ảnh Báo Cáo</button>
-    </div>
-
-    <div class="workspace">
-        <div id="collage-wrapper">
-            <div id="collage-container">
-                <div class="banners-row" id="banners-container"></div>
-                <div class="grid-row" id="champs-container"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="sidebar-right">
-        <h2>KHO ẢNH HỆ THỐNG</h2>
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Nhập tên tướng/skin để tìm...">
-        <div class="gallery" id="gallery">
-            </div>
-    </div>
-
-    <script>
+<script>
         const container = document.getElementById('collage-container');
         const bannersContainer = document.getElementById('banners-container');
         const champsContainer = document.getElementById('champs-container');
@@ -182,15 +6,53 @@
         const gallery = document.getElementById('gallery');
         const imageMap = new Map();
 
-        // ================= DATABASE ẢNH CỦA BẠN =================
-        // NHẬP TÊN CÁC FILE ẢNH BẠN ĐÃ TẢI LÊN GITHUB VÀO ĐÂY:
-        const skinDatabase = [
-            "nakroth-thu-nguyen-ve-than.jpg",
-            "tulen-chi-ton.png",
-            "valhein-vu-khi-toi-thuong.jpg",
-            // Thêm tiếp tên file của bạn ở dưới, nhớ có dấu phẩy ở cuối mỗi dòng
-        ];
-        // ========================================================
+        // ================= HỆ THỐNG FIX ĐỌC ẢNH TỰ ĐỘNG =================
+        const CONFIG = {
+            baseDir: "images", // Thư mục gốc trên GitHub
+            // Bạn chỉ cần khai báo tên thư mục tướng và số lượng ảnh trong đó
+            heroes: [
+                { id: "sines", name: "Sinestrea", count: 15 },
+                { id: "nak", name: "Nakroth", count: 20 },
+                { id: "val", name: "Valhein", count: 12 },
+                { id: "tulen", name: "Tulen", count: 10 }
+            ]
+        };
+
+        // Hàm load ảnh tự động từ thư mục
+        function loadDatabaseSkins() {
+            gallery.innerHTML = '';
+            
+            CONFIG.heroes.forEach(hero => {
+                for (let i = 1; i <= hero.count; i++) {
+                    // Hệ thống hỗ trợ cả định dạng 1.png và kiểu Windows 1 (1).png
+                    const fileNames = [`${i}.png`, `1 (${i-1}).png` ];
+                    
+                    fileNames.forEach(fileName => {
+                        const img = document.createElement('img');
+                        const src = `${CONFIG.baseDir}/${hero.id}/${fileName}`;
+                        
+                        img.src = src;
+                        img.crossOrigin = "anonymous";
+                        img.className = 'gallery-item';
+                        img.draggable = true;
+                        
+                        // Tên tìm kiếm: "tên tướng + số" (ví dụ: nakroth 1)
+                        img.dataset.name = `${hero.name} ${i}`.toLowerCase();
+                        img.title = `${hero.name} - Skin ${i}`;
+
+                        img.addEventListener('dragstart', (e) => {
+                            e.dataTransfer.setData('text/plain', src);
+                        });
+
+                        // Nếu không tìm thấy file (ví dụ i=15 nhưng thư mục chỉ có 10 ảnh), tự ẩn đi
+                        img.onerror = () => { img.remove(); };
+
+                        gallery.appendChild(img);
+                    });
+                }
+            });
+        }
+        // ================================================================
 
         const templates = {
             't17': { cols: 7, rows: 3, statsCols: 4, statsRows: 1, gap: 24, pad: 30, bannerH: 260 },
@@ -238,10 +100,10 @@
             let currentArea = 0, champCount = 0;
             while (currentArea < totalArea) {
                 if (currentArea === statsIndexTrigger) {
-                    champsHTML += createSlotHTML('stats', 'Thả Khung<br>Thông Số', 'stats-box');
+                    champsHTML += createSlotHTML('stats', 'Khung Thông Số', 'stats-box');
                     currentArea += statsArea;
                 } else {
-                    champsHTML += createSlotHTML(`champ_${champCount}`, '+ Thả Ảnh');
+                    champsHTML += createSlotHTML(`champ_${champCount}`, '+');
                     champCount++; currentArea++;
                 }
             }
@@ -257,34 +119,7 @@
             });
         });
 
-        /* ================= HỆ THỐNG LOAD ẢNH CÓ SẴN ================= */
-        function loadDatabaseSkins() {
-            gallery.innerHTML = '';
-            skinDatabase.forEach(fileName => {
-                const img = document.createElement('img');
-                // Gọi thẳng tên file vì nó nằm chung chỗ với index.html trên GitHub
-                img.src = fileName; 
-                img.crossOrigin = "anonymous"; // Chống lỗi khi xuất ảnh
-                img.className = 'gallery-item';
-                img.draggable = true;
-                
-                // Cắt đuôi .jpg, .png và đổi dấu gạch ngang thành dấu cách để tìm kiếm dễ hơn
-                const searchName = fileName.split('.')[0].replace(/-/g, ' ').toLowerCase();
-                img.dataset.name = searchName;
-                img.title = searchName;
-
-                img.addEventListener('dragstart', (dragEvent) => {
-                    dragEvent.dataTransfer.setData('text/plain', img.src);
-                });
-
-                // Nếu ảnh tải lỗi (do nhập sai tên file), ẩn ảnh đó đi
-                img.onerror = () => { img.style.display = 'none'; };
-
-                gallery.appendChild(img);
-            });
-        }
-
-        // Tìm kiếm
+        // Tìm kiếm skin trong gallery
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase();
             document.querySelectorAll('.gallery-item').forEach(img => {
@@ -292,7 +127,7 @@
             });
         });
 
-        /* ================= KÉO THẢ VÀ XUẤT ẢNH ================= */
+        // Xử lý kéo thả (Drop)
         container.addEventListener('dragover', e => {
             e.preventDefault();
             const slot = e.target.closest('.slot');
@@ -324,6 +159,7 @@
             }
         });
 
+        // Xuất ảnh Canvas 2130x1806
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -334,35 +170,26 @@
             document.querySelectorAll('.slot').forEach(slot => {
                 const id = slot.dataset.id;
                 const x = slot.offsetLeft, y = slot.offsetTop, w = slot.offsetWidth, h = slot.offsetHeight;
-
                 ctx.fillStyle = '#0f172a'; ctx.fillRect(x, y, w, h);
 
                 if (imageMap.has(id)) {
                     const img = imageMap.get(id);
-                    const imgAspect = img.width / img.height;
-                    const slotAspect = w / h;
-                    let drawX = x, drawY = y, drawW = w, drawH = h;
-
-                    if (imgAspect > slotAspect) {
-                        drawW = h * imgAspect; drawX = x - (drawW - w) / 2;
-                    } else {
-                        drawH = w / imgAspect; drawY = y - (drawH - h) / 2;
-                    }
-
+                    const s = Math.max(w / img.width, h / img.height);
                     ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
-                    ctx.drawImage(img, drawX, drawY, drawW, drawH); ctx.restore();
+                    ctx.drawImage(img, x + (w - img.width * s) / 2, y + (h - img.height * s) / 2, img.width * s, img.height * s);
+                    ctx.restore();
                 }
                 ctx.strokeStyle = imageMap.has(id) ? '#d4af37' : '#475569';
-                ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
+                ctx.lineWidth = 4; ctx.strokeRect(x, y, w, h);
             });
 
             const link = document.createElement('a');
-            link.download = `Lien-Quan-2130x1806.png`;
+            link.download = `Lien-Quan-Studio-2130x1806.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
         });
 
-        // Khởi chạy
+        // Khởi chạy hệ thống
         loadDatabaseSkins();
         buildLayout('t17'); 
     </script>
