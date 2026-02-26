@@ -199,22 +199,39 @@
 
         // LOAD KHO ẢNH TỪ THƯ MỤC IMAGER
         function loadGallery() {
-            gallery.innerHTML = '';
-            danhSachTuong.forEach(tuong => {
-                for (let i = 1; i <= soSkinMoiTuong; i++) {
-                    const img = document.createElement('img');
-                    const src = `imager/${tuong}/${i}.jpg`;
-                    img.src = src;
-                    img.className = 'gallery-item';
-                    img.dataset.name = tuong;
-                    img.draggable = true;
-                    img.crossOrigin = "anonymous";
-                    img.addEventListener('dragstart', e => e.dataTransfer.setData('text', src));
-                    img.onerror = () => img.remove();
-                    gallery.appendChild(img);
-                }
-            });
-        }
+    gallery.innerHTML = '';
+    
+    // Danh sách tên file chính xác bạn đang có trong thư mục 'sines'
+    // Bạn có thêm ảnh nào thì cứ viết đúng tên file vào đây nhé
+    const danh-sach-anh = [
+        "Sinestrea Điệp viên cánh cụt.png",
+        "Sinestrea Giấc mộng biển xanh.png",
+        "Sinestrea Lữ khách sa mạc.png",
+        "Sinestrea Nữ quỷ say ngủ.png",
+        "Sinestrea S-Quang vinh.png",
+        "Sinestrea Tiểu thư băng giá.png",
+        "Sinestrea WaVe.png",
+        "Sinestrea Đại tiểu thư.png"
+    ];
+
+    danh-sach-anh.forEach(tenFile => {
+        const img = document.createElement('img');
+        // Sửa đường dẫn cho đúng tên thư mục 'images/sines/...'
+        const src = `images/sines/${tenFile}`; 
+        
+        img.src = src;
+        img.className = 'gallery-item';
+        // Đặt tên để tìm kiếm (bỏ đuôi .png cho sạch)
+        img.dataset.name = tenFile.replace('.png', '').toLowerCase();
+        img.draggable = true;
+        img.crossOrigin = "anonymous";
+        
+        img.addEventListener('dragstart', e => e.dataTransfer.setData('text', src));
+        img.onerror = () => img.remove(); // Nếu sai tên file thì tự ẩn
+        
+        gallery.appendChild(img);
+    });
+}
 
         // XỬ LÝ KÉO THẢ
         container.addEventListener('dragover', e => {
@@ -291,3 +308,4 @@
     </script>
 </body>
 </html>
+
