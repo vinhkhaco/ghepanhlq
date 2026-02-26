@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ Thống Ghép Ảnh Liên Quân Pro</title>
+    <style>
+        /* CSS giữ nguyên khung của bạn nhưng tối ưu hiển thị */
+        :root { --bg: #0f172a; --panel: #1e293b; --accent: #3b82f6; --gold: #d4af37; }
+        body { margin: 0; display: flex; height: 100vh; background: var(--bg); color: white; font-family: sans-serif; }
+        
+        .sidebar-left { width: 250px; padding: 20px; background: var(--panel); border-right: 1px solid #334155; }
+        .workspace { flex: 1; display: flex; justify-content: center; align-items: center; background: #000; overflow: hidden; }
+        .sidebar-right { width: 320px; padding: 20px; background: var(--panel); border-left: 1px solid #334155; display: flex; flex-direction: column; }
+
+        #collage-container { 
+            width: 2130px; height: 1806px; background: #1a2042; 
+            display: flex; flex-direction: column; padding: 30px; gap: 20px;
+            transform-origin: center;
+        }
+        .slot { background: #0f172a; border: 3px solid #475569; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; }
+        
+        .gallery { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .gallery-item { width: 100%; aspect-ratio: 1; object-fit: cover; cursor: grab; border-radius: 4px; }
+        .search-box { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; }
+        
+        /* Layout Grid */
+        .banners-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; height: 260px; }
+        .champs-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 20px; flex: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-left">
+        <h3>BỐ CỤC</h3>
+        <button onclick="window.location.reload()">Làm mới hệ thống</button>
+        <hr>
+        <button id="downloadBtn" style="background: #10b981; color: white; margin-top: 20px; width: 100%; padding: 15px;">XUẤT ẢNH PNG</button>
+    </div>
+
+    <div class="workspace">
+        <div id="collage-wrapper">
+            <div id="collage-container">
+                <div class="banners-row" id="banners"></div>
+                <div class="champs-row" id="champs"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-right">
+        <h3>KHO SKIN HỆ THỐNG</h3>
+        <input type="text" id="search" class="search-box" placeholder="Tìm tên tướng (ví dụ: sines)...">
+        <div class="gallery" id="gallery"></div>
+    </div>
+
+    <script>
+        // ================= CẤU HÌNH HỆ THỐNG (CHỈ SỬA Ở ĐÂY) =================
+        const CONFIG = {
+            baseDir: "images", // Thư mục gốc trên GitHub
+            imgType: ".png",   // Đuôi file ảnh
+            // Danh sách tướng và số lượng skin tương ứng
+            database: [
+                { folder: "sines", name: "Sinestrea", skins: 8 },
+                { folder: "nak", name: "Nakroth", skins: 15 },
+                { folder: "valhein", name: "Valhein", skins: 12 },
+                { folder: "tulen", name: "Tulen", skins: 10 }
+            ]
+        };
+
+        const gallery = document.getElementById('gallery');
+        const champsContainer = document.getElementById('champs');
+        const bannersContainer = document.getElementById('banners');
+        const imageMap = new Map();
+
+        // 1. Khởi tạo kho ảnh tự động
+        function initGallery() {
+            gallery.innerHTML = '';
+            CONFIG.database.forEach(tuong => {
+                for (let i = 1; i <= tuong.skins; i++) {
+                    const img = document.createElement('img');
+                    const path = `${CONFIG.baseDir}/${tuong.folder}/${i}${CONFIG.imgType}`;
+                    
+                    img.src = path;
+                    img.className = 'gallery-item';
+                    img.dataset.name = tuong.name.toLowerCase();
+                    img.draggable = true;
+                    img.crossOrigin = "anonymous";
+                    
+                    img.addEventListener('dragstart', e => e.dataTransfer.setData('text', path));
+                    img.onerror = () => img.remove(); // Tự xóa nếu file không tồn tại
+                    
+                    gallery.appendChild(img);
+                }
+            });
+        }
+
+        // 2. Tạo khung lưới (Mẫu 17 tướng cơ bản)
+        function initLayout() {
+            bannersContainer.innerHTML = '';
+            champsContainer.innerHTML = '';
+            for(let i=0; i<3; i++) bannersContainer.innerHTML += `<div class="slot" data-id="b${i}">Banner ${i+1}</div>`;
+            for(let i=0; i<17; i++) champsContainer.innerHTML += `<div class="slot" data-id="c${i}">+</div>`;
+            
+            document.querySelectorAll('.slot').forEach(slot => {
+                slot.addEventListener('dragover', e => e.preventDefault());
+                slot.addEventListener('drop', e => {
+                    const path = e.dataTransfer.getData('text');
+                    const img = new Image();
+                    img.crossOrigin = "anonymous";
+                    img.onload = () => {
+                        slot.style.backgroundImage = `url(${path})`;
+                        slot.innerText = '';
+                        imageMap.set(slot.dataset.id, img);
+                    };
+                    img.src = path;
+                });
+            });
+        }
+
+        // 3. Tìm kiếm
+        document.getElementById('search').addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            document.querySelectorAll('.gallery-item').forEach(img => {
+                img.style.display = img.dataset.name.includes(val) ? 'block' : 'none';
+            });
+        });
+
+        // 4. Co giãn màn hình
+        function adjustScale() {
+            const scale = Math.min((window.innerWidth - 600) / 2130, (window.innerHeight - 100) / 1806, 1);
+            document.getElementById('collage-wrapper').style.transform = `scale(${scale})`;
+        }
+
+        window.onresize = adjustScale;
+        initGallery();
+        initLayout();
+        adjustScale();
+    </script>
+</body>
+</html>
