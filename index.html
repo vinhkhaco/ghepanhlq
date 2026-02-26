@@ -1,314 +1,38 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Ghép Ảnh Liên Quân PRO - 2130x1806</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --panel-bg: #1e293b;
-            --border-color: #334155;
-            --accent-color: #3b82f6;
-            --text-main: #f8fafc;
-            --gold: #d4af37;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* SIDEBAR TRÁI: ĐIỀU KHIỂN */
-        .sidebar-left {
-            width: 280px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-left h1 { font-size: 16px; margin: 0; color: var(--gold); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        
-        button {
-            background-color: transparent; color: var(--text-main);
-            border: 1px solid var(--border-color); padding: 10px;
-            border-radius: 6px; cursor: pointer; font-size: 14px;
-            transition: 0.2s; text-align: left; width: 100%;
-        }
-        button:hover { background-color: rgba(59, 130, 246, 0.1); border-color: var(--accent-color); }
-        button.active { background-color: var(--accent-color); border-color: var(--accent-color); font-weight: bold; }
-
-        .btn-success { background-color: #10b981; border-color: #10b981; text-align: center; font-weight: bold; margin-top: auto; padding: 15px; }
-
-        /* KHU VỰC GIỮA: KHUNG GHÉP */
-        .workspace {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #0b0f1a;
-            overflow: hidden;
-            position: relative;
-        }
-
-        #collage-wrapper { transform-origin: center center; }
-
-        #collage-container {
-            width: 2130px; height: 1806px;
-            background-color: #1a2042;
-            display: flex; flex-direction: column;
-            padding: var(--pad); gap: var(--gap);
-            box-sizing: border-box;
-        }
-
-        .banners-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); height: var(--bannerH); flex-shrink: 0; }
-        .grid-row { display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr); gap: var(--gap); flex-grow: 1; }
-
-        .slot {
-            background-color: #0f172a; border: 3px solid #475569;
-            background-size: cover; background-position: center;
-            display: flex; justify-content: center; align-items: center;
-            transition: 0.2s; position: relative;
-        }
-        .slot.drag-over { border-color: #10b981; background-color: rgba(16, 185, 129, 0.2); }
-        .slot-text { color: rgba(255,255,255,0.3); font-size: 20px; font-weight: bold; text-align: center; pointer-events: none; }
-        .slot.has-image .slot-text { display: none; }
-        .slot.stats-box { background-color: #232a5e; grid-column: span var(--statsCols); grid-row: span var(--statsRows); border-style: dashed; }
-
-        /* SIDEBAR PHẢI: KHO ẢNH */
-        .sidebar-right {
-            width: 320px;
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--border-color);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            flex-shrink: 0;
-        }
-
-        .search-box {
-            width: 100%; padding: 10px; border-radius: 6px;
-            border: 1px solid var(--border-color); background: var(--bg-color);
-            color: white; box-sizing: border-box;
-        }
-
-        .gallery {
-            flex: 1; overflow-y: auto;
-            display: grid; grid-template-columns: repeat(2, 1fr);
-            gap: 10px; align-content: start;
-        }
-
-        .gallery-item {
-            width: 100%; aspect-ratio: 1; object-fit: cover;
-            border-radius: 6px; cursor: grab; background: #000;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="sidebar-left">
-        <h1>BỐ CỤC BÁO CÁO</h1>
-        <button class="tpl-btn active" data-id="t17">Mẫu 17 Tướng</button>
-        <button class="tpl-btn" data-id="t45">Mẫu 45 Tướng</button>
-        <button class="tpl-btn" data-id="t100">Mẫu 100 Tướng</button>
-        <button id="downloadBtn" class="btn-success">XUẤT ẢNH PNG</button>
-    </div>
-
-    <div class="workspace">
-        <div id="collage-wrapper">
-            <div id="collage-container">
-                <div class="banners-row" id="banners-container"></div>
-                <div class="grid-row" id="champs-container"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="sidebar-right">
-        <h2>KHO SKIN CÓ SẴN</h2>
-        <input type="text" id="searchInput" class="search-box" placeholder="Tìm tên tướng...">
-        <div class="gallery" id="gallery"></div>
-    </div>
-
-    <script>
-        // --- CẤU HÌNH TỰ ĐỘNG ---
-        // Thêm tên thư mục tướng vào đây (phải khớp với tên thư mục trên GitHub)
-        const danhSachTuong = ["nakroth", "valhein", "tulen", "airi", "raz", "florentino"]; 
-        const soSkinMoiTuong = 15; // Web sẽ tự thử tìm từ 1.jpg đến 15.jpg cho mỗi tướng
-
-        const container = document.getElementById('collage-container');
-        const bannersContainer = document.getElementById('banners-container');
-        const champsContainer = document.getElementById('champs-container');
-        const wrapper = document.getElementById('collage-wrapper');
-        const gallery = document.getElementById('gallery');
-        const imageMap = new Map();
-
-        const templates = {
-            't17': { cols: 7, rows: 3, statsCols: 4, statsRows: 1, gap: 24, pad: 30, bannerH: 260 },
-            't45': { cols: 10, rows: 5, statsCols: 5, statsRows: 1, gap: 16, pad: 25, bannerH: 260 },
-            't100': { cols: 14, rows: 8, statsCols: 6, statsRows: 2, gap: 6, pad: 20, bannerH: 260 }
-        };
-
-        function buildLayout(id) {
-            const cfg = templates[id];
-            container.style.setProperty('--cols', cfg.cols);
-            container.style.setProperty('--rows', cfg.rows);
-            container.style.setProperty('--statsCols', cfg.statsCols);
-            container.style.setProperty('--statsRows', cfg.statsRows);
-            container.style.setProperty('--gap', cfg.gap + 'px');
-            container.style.setProperty('--pad', cfg.pad + 'px');
-            container.style.setProperty('--bannerH', cfg.bannerH + 'px');
-
-            bannersContainer.innerHTML = ''; champsContainer.innerHTML = ''; imageMap.clear();
-
-            for(let i=0; i<3; i++) {
-                bannersContainer.innerHTML += `<div class="slot" data-id="b${i}"><span class="slot-text">Banner ${i+1}</span></div>`;
-            }
-
-            const totalArea = cfg.cols * cfg.rows;
-            const statsArea = cfg.statsCols * cfg.statsRows;
-            const statsTrigger = Math.floor((cfg.rows - cfg.statsRows) / 2) * cfg.cols;
-
-            let currentArea = 0, champIdx = 0;
-            while (currentArea < totalArea) {
-                if (currentArea === statsTrigger) {
-                    champsContainer.innerHTML += `<div class="slot stats-box" data-id="stats"><span class="slot-text">THÔNG SỐ</span></div>`;
-                    currentArea += statsArea;
-                } else {
-                    champsContainer.innerHTML += `<div class="slot" data-id="c${champIdx}"><span class="slot-text">+</span></div>`;
-                    champIdx++; currentArea++;
-                }
-            }
-            adjustScale();
-        }
-
-        function adjustScale() {
-            const workspace = document.querySelector('.workspace');
-            const scale = Math.min((workspace.clientWidth - 40) / 2130, (workspace.clientHeight - 40) / 1806, 1);
-            wrapper.style.transform = `scale(${scale})`;
-        }
-
-        // LOAD KHO ẢNH TỪ THƯ MỤC IMAGER
-      function loadGallery() {
+function loadGallery() {
     gallery.innerHTML = '';
     
-    // 1. Kiểm tra lại danh sách này, phải khớp 100% tên thư mục trên GitHub
-    // Ví dụ: ["sines", "nak", "valhein", "tulen", "airi", "raz", "florentino"]
+    // 1. Khai báo đúng các thư mục tướng bạn đang có
     const danhSachTuong = ["sines", "nak"]; 
-    
-    const soSkinToiDa = 20; // Số lượng ảnh tối đa trong 1 thư mục tướng
 
-    danhSachTuong.forEach(tuong => {
-        for (let i = 1; i <= soSkinToiDa; i++) {
-            // Thử cả 2 đuôi file phổ biến để không bị sót
-            [".png", ".jpg"].forEach(duoi => {
-                const img = document.createElement('img');
-                
-                // CHÚ Ý: Đổi 'imager' thành 'images' nếu thư mục của bạn là images
-                const src = `images/${tuong}/${i}${duoi}`; 
-                
-                img.src = src;
-                img.className = 'gallery-item';
-                img.dataset.name = `${tuong} ${i}`; // Để tìm kiếm theo tên tướng
-                img.draggable = true;
-                img.crossOrigin = "anonymous";
-                
-                // Xử lý kéo thả
-                img.addEventListener('dragstart', e => {
-                    e.dataTransfer.setData('text/plain', src);
-                });
+    // 2. Danh sách tên file chính xác (phải giống hệt tên trên GitHub)
+    const danh_sach_file_sines = [
+        "Sinestrea Điệp viên cánh cụt.png",
+        "Sinestrea Giấc mộng biển xanh.png",
+        "Sinestrea Lữ khách sa mạc.png",
+        "Sinestrea Nữ quỷ say ngủ.png",
+        "Sinestrea S-Quang vinh.png",
+        "Sinestrea Tiểu thư băng giá.png",
+        "Sinestrea WaVe.png",
+        "Sinestrea Đại tiểu thư.png"
+    ];
 
-                // Nếu không thấy ảnh (sai tên, sai đuôi, hoặc chưa up) thì tự xóa bỏ
-                img.onerror = () => { img.remove(); };
-                
-                gallery.appendChild(img);
-            });
-        }
+    // 3. Chạy lệnh hiển thị ảnh
+    danh_sach_file_sines.forEach(tenFile => {
+        const img = document.createElement('img');
+        // Đã sửa thành 'images' và đúng tên file tiếng Việt
+        const src = `images/sines/${tenFile}`; 
+        
+        img.src = src;
+        img.className = 'gallery-item';
+        img.dataset.name = tenFile.toLowerCase();
+        img.draggable = true;
+        img.crossOrigin = "anonymous";
+        
+        img.addEventListener('dragstart', e => {
+            e.dataTransfer.setData('text/plain', src);
+        });
+
+        img.onerror = () => { img.style.display = 'none'; };
+        gallery.appendChild(img);
     });
 }
-
-        // XỬ LÝ KÉO THẢ
-        container.addEventListener('dragover', e => {
-            e.preventDefault();
-            const slot = e.target.closest('.slot');
-            if(slot) slot.classList.add('drag-over');
-        });
-
-        container.addEventListener('dragleave', e => {
-            const slot = e.target.closest('.slot');
-            if(slot) slot.classList.remove('drag-over');
-        });
-
-        container.addEventListener('drop', e => {
-            e.preventDefault();
-            const slot = e.target.closest('.slot');
-            const src = e.dataTransfer.getData('text');
-            if(slot && src) {
-                slot.classList.remove('drag-over');
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.onload = () => {
-                    slot.style.backgroundImage = `url(${src})`;
-                    slot.classList.add('has-image');
-                    imageMap.set(slot.dataset.id, img);
-                };
-                img.src = src;
-            }
-        });
-
-        // TÌM KIẾM
-        document.getElementById('searchInput').addEventListener('input', e => {
-            const val = e.target.value.toLowerCase();
-            document.querySelectorAll('.gallery-item').forEach(img => {
-                img.style.display = img.dataset.name.includes(val) ? 'block' : 'none';
-            });
-        });
-
-        // XUẤT ẢNH
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const cvs = document.createElement('canvas');
-            const ctx = cvs.getContext('2d');
-            cvs.width = 2130; cvs.height = 1806;
-            ctx.fillStyle = '#1a2042'; ctx.fillRect(0,0,2130,1806);
-
-            document.querySelectorAll('.slot').forEach(slot => {
-                const x = slot.offsetLeft, y = slot.offsetTop, w = slot.offsetWidth, h = slot.offsetHeight;
-                ctx.fillStyle = '#0f172a'; ctx.fillRect(x,y,w,h);
-                if(imageMap.has(slot.dataset.id)) {
-                    const img = imageMap.get(slot.dataset.id);
-                    ctx.save(); ctx.beginPath(); ctx.rect(x,y,w,h); ctx.clip();
-                    const s = Math.max(w/img.width, h/img.height);
-                    ctx.drawImage(img, x+(w-img.width*s)/2, y+(h-img.height*s)/2, img.width*s, img.height*s);
-                    ctx.restore();
-                }
-                ctx.strokeStyle = '#d4af37'; ctx.lineWidth = 2; ctx.strokeRect(x,y,w,h);
-            });
-
-            const link = document.createElement('a');
-            link.download = 'GhepAnhLienQuan.png';
-            link.href = cvs.toDataURL('image/png');
-            link.click();
-        });
-
-        document.querySelectorAll('.tpl-btn').forEach(b => b.addEventListener('click', (e) => {
-            document.querySelectorAll('.tpl-btn').forEach(x => x.classList.remove('active'));
-            e.target.classList.add('active');
-            buildLayout(e.target.dataset.id);
-        }));
-
-        window.addEventListener('resize', adjustScale);
-        buildLayout('t17');
-        loadGallery();
-    </script>
-</body>
-</html>
-
