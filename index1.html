@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Ghép Ảnh 2130x1806 - Tỷ Lệ Chuẩn</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --border-color: #334155;
+            --accent-color: #3b82f6;
+            --text-main: #f8fafc;
+            --gold: #d4af37;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ----- THANH ĐIỀU KHIỂN ----- */
+        .sidebar {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .sidebar h1 { font-size: 18px; margin: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; }
+        .control-group label { font-size: 13px; color: #94a3b8; font-weight: bold; margin-bottom: 10px; display: block; }
+
+        button {
+            background-color: transparent; color: var(--text-main);
+            border: 1px solid var(--border-color); padding: 12px;
+            border-radius: 6px; cursor: pointer; font-size: 15px;
+            transition: 0.2s; text-align: left; margin-bottom: 8px; width: 100%;
+        }
+        button:hover { background-color: rgba(59, 130, 246, 0.1); border-color: var(--accent-color); }
+        button.active { background-color: var(--accent-color); border-color: var(--accent-color); font-weight: bold; }
+
+        .btn-success { background-color: #10b981; border-color: #10b981; text-align: center; font-weight: bold; margin-top: auto; }
+        .btn-success:hover { background-color: #059669; }
+
+        /* ----- KHU VỰC LÀM VIỆC ----- */
+        .workspace {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            overflow: hidden; /* Không cần cuộn vì đã có thuật toán scale */
+        }
+
+        #collage-wrapper {
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+
+        /* KHUNG CHUẨN: Kích thước được khóa chết ở tỷ lệ 2130x1806 */
+        #collage-container {
+            width: 2130px;
+            height: 1806px;
+            background-color: #1a2042;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            
+            /* Các biến này sẽ được JS cập nhật động */
+            padding: var(--pad);
+            gap: var(--gap);
+        }
+
+        /* Hàng Banner trên cùng */
+        .banners-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--gap);
+            height: var(--bannerH);
+            flex-shrink: 0;
+        }
+
+        /* Lưới Tướng + Thông số (Tự động lấp đầy phần chiều cao còn lại) */
+        .grid-row {
+            display: grid;
+            grid-template-columns: repeat(var(--cols), 1fr);
+            grid-template-rows: repeat(var(--rows), 1fr);
+            gap: var(--gap);
+            flex-grow: 1;
+        }
+
+        /* Thiết kế từng ô trống */
+        .slot {
+            background-color: #0f172a;
+            border: 3px solid #475569;
+            position: relative;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: border-color 0.2s;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .slot:hover { border-color: var(--gold); }
+        .slot.has-image { border-color: var(--gold); }
+        .slot input { display: none; }
+        
+        .slot-text {
+            color: rgba(255,255,255,0.4);
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            text-shadow: 2px 2px 4px #000;
+        }
+        .slot.has-image .slot-text { display: none; }
+
+        /* Ô đặc biệt (Thông số) */
+        .slot.stats-box {
+            background-color: #232a5e;
+            grid-column: span var(--statsCols);
+            grid-row: span var(--statsRows);
+            border-style: dashed;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h1>Cấu Hình Layout Chuẩn</h1>
+        
+        <div class="control-group">
+            <label>MẬT ĐỘ TƯỚNG (2130x1806)</label>
+            <button class="tpl-btn active" data-id="t17">Mẫu 17 Tướng (Khoảng trống to)</button>
+            <button class="tpl-btn" data-id="t45">Mẫu 45 Tướng (Khoảng trống vừa)</button>
+            <button class="tpl-btn" data-id="t100">Mẫu 100 Tướng (Xếp khít nhau)</button>
+        </div>
+
+        <button id="downloadBtn" class="btn-success">⬇️ Xuất Ảnh Facebook Cực Nét</button>
+    </div>
+
+    <div class="workspace">
+        <div id="collage-wrapper">
+            <div id="collage-container">
+                <div class="banners-row" id="banners-container"></div>
+                <div class="grid-row" id="champs-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('collage-container');
+        const bannersContainer = document.getElementById('banners-container');
+        const champsContainer = document.getElementById('champs-container');
+        const wrapper = document.getElementById('collage-wrapper');
+        const imageMap = new Map();
+
+        // TỪ ĐIỂN TỶ LỆ: Quy định mọi kích thước toán học
+        const templates = {
+            't17': { cols: 7, rows: 3, statsCols: 4, statsRows: 1, gap: 24, pad: 30, bannerH: 260 },
+            't45': { cols: 10, rows: 5, statsCols: 5, statsRows: 1, gap: 16, pad: 25, bannerH: 260 },
+            't100': { cols: 14, rows: 8, statsCols: 6, statsRows: 2, gap: 6, pad: 20, bannerH: 260 }
+        };
+
+        // Hàm giúp hiển thị vừa màn hình máy tính của bạn
+        function adjustScale() {
+            const workspace = document.querySelector('.workspace');
+            const availableW = workspace.clientWidth - 80;
+            const availableH = workspace.clientHeight - 80;
+            
+            // Tính toán tỷ lệ thu nhỏ để nhét vừa khối 2130x1806 vào màn hình hiện tại
+            const scaleW = availableW / 2130;
+            const scaleH = availableH / 1806;
+            const scale = Math.min(scaleW, scaleH, 1); // Không phóng to quá 100%
+            
+            wrapper.style.transform = `scale(${scale})`;
+        }
+        window.addEventListener('resize', adjustScale);
+
+        // Hàm tạo 1 ô trống (slot)
+        function createSlotHTML(id, label, extraClass = '') {
+            return `<label class="slot ${extraClass}" data-id="${id}">
+                        <input type="file" accept="image/*">
+                        <span class="slot-text">${label}</span>
+                    </label>`;
+        }
+
+        // Trái tim của thuật toán: Tính toán và vẽ lưới
+        function buildLayout(templateId) {
+            const cfg = templates[templateId];
+            
+            // 1. Áp dụng CSS Variables để Grid tự chia tỷ lệ
+            container.style.setProperty('--cols', cfg.cols);
+            container.style.setProperty('--rows', cfg.rows);
+            container.style.setProperty('--statsCols', cfg.statsCols);
+            container.style.setProperty('--statsRows', cfg.statsRows);
+            container.style.setProperty('--gap', cfg.gap + 'px');
+            container.style.setProperty('--pad', cfg.pad + 'px');
+            container.style.setProperty('--bannerH', cfg.bannerH + 'px');
+
+            // Xóa dữ liệu cũ
+            bannersContainer.innerHTML = '';
+            champsContainer.innerHTML = '';
+            imageMap.clear();
+
+            // 2. Tạo 3 Banners cố định
+            let bannersHTML = '';
+            for(let i=0; i<3; i++) bannersHTML += createSlotHTML(`banner_${i}`, '+ Banner');
+            bannersContainer.innerHTML = bannersHTML;
+
+            // 3. Tính toán vị trí đặt khung Thông Số (Luôn đặt ở giữa lưới)
+            let champsHTML = '';
+            const totalArea = cfg.cols * cfg.rows;
+            const statsArea = cfg.statsCols * cfg.statsRows;
+            
+            // Tìm hàng để đặt khung Stats sao cho cân đối nhất
+            const statsStartRow = Math.floor((cfg.rows - cfg.statsRows) / 2);
+            const statsIndexTrigger = statsStartRow * cfg.cols;
+
+            let currentArea = 0;
+            let champCount = 0;
+
+            // Vòng lặp rải DOM, CSS Grid sẽ tự động xếp chúng vào đúng tọa độ
+            while (currentArea < totalArea) {
+                if (currentArea === statsIndexTrigger) {
+                    champsHTML += createSlotHTML('stats', '+ Ảnh Thông Số (To)', 'stats-box');
+                    currentArea += statsArea;
+                } else {
+                    champsHTML += createSlotHTML(`champ_${champCount}`, '+ Tướng');
+                    champCount++;
+                    currentArea++;
+                }
+            }
+            champsContainer.innerHTML = champsHTML;
+            adjustScale();
+        }
+
+        // Chuyển đổi Template
+        document.querySelectorAll('.tpl-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                if(confirm("Lưu ý: Đổi mẫu sẽ làm trống các ảnh hiện tại. Bạn tiếp tục chứ?")) {
+                    buildLayout(btn.dataset.id);
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        });
+
+        // Xử lý Upload và lưu trữ Image để xuất file
+        container.addEventListener('change', function(e) {
+            if (e.target.tagName.toLowerCase() === 'input' && e.target.type === 'file') {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const slot = e.target.parentElement;
+                const id = slot.dataset.id;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        slot.style.backgroundImage = `url(${event.target.result})`;
+                        slot.classList.add('has-image');
+                        imageMap.set(id, img);
+                    }
+                    img.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+                e.target.value = '';
+            }
+        });
+
+        // Thuật toán Canvas Đỉnh Cao: Lấy kích thước gốc KHÔNG bị ảnh hưởng bởi Scale
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Cố định cứng kích thước xuất ra: 2130x1806 
+            // (Bạn có thể nhân x1.5 hoặc x2 chỗ này nếu muốn nét hơn nữa, thuật toán vẫn chạy đúng)
+            const exportW = 2130;
+            const exportH = 1806;
+            canvas.width = exportW;
+            canvas.height = exportH;
+
+            // Tô nền chính
+            ctx.fillStyle = '#1a2042';
+            ctx.fillRect(0, 0, exportW, exportH);
+
+            const slots = document.querySelectorAll('.slot');
+            
+            slots.forEach(slot => {
+                const id = slot.dataset.id;
+                
+                // offsetLeft và offsetTop lấy đúng tọa độ px chuẩn trên tỷ lệ 2130x1806
+                // Nó hoàn toàn phớt lờ lệnh css transform: scale() nên hình vẽ ra chính xác 100%
+                const x = slot.offsetLeft;
+                const y = slot.offsetTop;
+                const w = slot.offsetWidth;
+                const h = slot.offsetHeight;
+
+                // Nền slot
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(x, y, w, h);
+
+                // Cắt ảnh cover
+                if (imageMap.has(id)) {
+                    const img = imageMap.get(id);
+                    const imgAspect = img.width / img.height;
+                    const slotAspect = w / h;
+                    let drawX = x, drawY = y, drawW = w, drawH = h;
+
+                    if (imgAspect > slotAspect) {
+                        drawW = h * imgAspect;
+                        drawX = x - (drawW - w) / 2;
+                    } else {
+                        drawH = w / imgAspect;
+                        drawY = y - (drawH - h) / 2;
+                    }
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.rect(x, y, w, h);
+                    ctx.clip();
+                    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+                    ctx.restore();
+                }
+
+                // Vẽ viền
+                ctx.strokeStyle = imageMap.has(id) ? '#d4af37' : '#475569';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x, y, w, h);
+            });
+
+            // Tải về
+            const link = document.createElement('a');
+            link.download = `bo-suu-tap-lien-quan-2130x1806.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        });
+
+        // Khởi động mẫu 17 tướng
+        buildLayout('t17'); 
+    </script>
+</body>
+</html>
