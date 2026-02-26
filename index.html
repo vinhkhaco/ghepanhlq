@@ -116,7 +116,44 @@
         cropCanvas.width = w;
         cropCanvas.height = h;
         cropCtx.drawImage(originalImg, x, y, w, h, 0, 0, w, h);
+// Giả sử đây là mảng chứa kho ảnh hệ thống của bạn
+let khoAnhHeThong = []; 
 
+// Hàm này giúp lưu lại danh sách ảnh ban đầu
+function loadKhoAnh() {
+    // Đoạn code bạn dùng để quét thư mục sines/...
+    // Đảm bảo không làm trống mảng này khi thực hiện hàm cắt
+}
+
+function processCrop() {
+    if (!originalImg.src) return alert("Bạn chưa chọn ảnh!");
+
+    const x = parseInt(document.getElementById('x').value);
+    const y = parseInt(document.getElementById('y').value);
+    const w = parseInt(document.getElementById('w').value);
+    const h = parseInt(document.getElementById('h').value);
+
+    // VẼ KẾT QUẢ CẮT
+    const cropCtx = cropCanvas.getContext('2d');
+    cropCanvas.width = w;
+    cropCanvas.height = h;
+    cropCtx.drawImage(originalImg, x, y, w, h, 0, 0, w, h);
+
+    // QUAN TRỌNG: Hiển thị kết quả nhưng KHÔNG reset kho ảnh
+    resultContainer.style.display = 'block';
+    btnDownload.style.display = 'block';
+
+    // Fix lỗi: Sau khi cắt xong, gọi lại hàm hiển thị kho ảnh bên phải
+    renderKhoAnhRightPanel(); 
+}
+
+function renderKhoAnhRightPanel() {
+    // Hàm này vẽ lại danh sách ảnh ở cột "KHO ẢNH HỆ THỐNG"
+    // Đảm bảo ID 'kho-anh' không bị innerHTML = '' mà không có dữ liệu bù vào
+}
+        if (typeof renderKhoAnh === "function") {
+        renderKhoAnh(); 
+    }
         // Hiện vùng kết quả
         resultContainer.style.display = 'block';
         btnDownload.style.display = 'block';
@@ -124,7 +161,8 @@
         // Cuộn xuống để xem kết quả
         resultContainer.scrollIntoView({ behavior: 'smooth' });
     }
-
+resultContainer.style.display = 'block';
+    btnDownload.style.display = 'block';
     function downloadImage() {
         const name = document.getElementById('heroName').value || ' tướng';
         const link = document.createElement('a');
@@ -136,3 +174,4 @@
 
 </body>
 </html>
+
