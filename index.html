@@ -2,374 +2,137 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Ghép Ảnh 2130x1806 - Tỷ Lệ Chuẩn</title>
+    <title>Tool Cắt Skin Liên Quân - Theo Thư Mục</title>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --panel-bg: #1e293b;
-            --border-color: #334155;
-            --accent-color: #3b82f6;
-            --text-main: #f8fafc;
-            --gold: #d4af37;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* ----- THANH ĐIỀU KHIỂN TRÁI ----- */
-        .sidebar-left {
-            width: 300px;
-            background-color: var(--panel-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        .sidebar-left h1 { font-size: 18px; margin: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; }
-        .control-group label { font-size: 13px; color: #94a3b8; font-weight: bold; margin-bottom: 10px; display: block; }
-
-        button {
-            background-color: transparent; color: var(--text-main);
-            border: 1px solid var(--border-color); padding: 12px;
-            border-radius: 6px; cursor: pointer; font-size: 15px;
-            transition: 0.2s; text-align: left; margin-bottom: 8px; width: 100%;
-        }
-        button:hover { background-color: rgba(59, 130, 246, 0.1); border-color: var(--accent-color); }
-        button.active { background-color: var(--accent-color); border-color: var(--accent-color); font-weight: bold; }
-
-        .btn-success { background-color: #10b981; border-color: #10b981; text-align: center; font-weight: bold; margin-top: auto; }
-        .btn-success:hover { background-color: #059669; }
-
-        /* ----- KHO ẢNH PHẢI ----- */
-        .sidebar-right {
-            width: 320px;
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--border-color);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
-            z-index: 10;
-            flex-shrink: 0;
-        }
-
-        .sidebar-right h2 { font-size: 16px; margin: 0; color: var(--gold); }
-        
-        .search-box {
-            width: 100%;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-color);
-            color: white;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        .gallery {
-            flex: 1;
-            overflow-y: auto;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            padding-right: 5px;
-            align-content: start;
-        }
-
-        .gallery::-webkit-scrollbar { width: 6px; }
-        .gallery::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
-
-        .gallery-item {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-            border-radius: 6px;
-            cursor: grab;
-            border: 2px solid transparent;
-            transition: 0.2s;
-            background-color: #0f172a;
-        }
-        .gallery-item:hover { border-color: var(--accent-color); transform: scale(1.02); }
-        .gallery-item:active { cursor: grabbing; }
-
-        /* ----- KHU VỰC LÀM VIỆC ----- */
-        .workspace {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-            overflow: hidden;
-        }
-
-        #collage-wrapper { transform-origin: center center; transition: transform 0.3s ease; }
-        
-        #collage-container {
-            width: 2130px; height: 1806px; background-color: #1a2042;
-            box-sizing: border-box; display: flex; flex-direction: column;
-            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            padding: var(--pad); gap: var(--gap);
-        }
-
-        .banners-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); height: var(--bannerH); flex-shrink: 0; }
-        .grid-row { display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr); gap: var(--gap); flex-grow: 1; }
-
-        .slot {
-            background-color: #0f172a; border: 3px solid #475569; position: relative;
-            cursor: pointer; background-size: cover; background-position: center;
-            display: flex; justify-content: center; align-items: center;
-            transition: border-color 0.2s; overflow: hidden; box-sizing: border-box;
-        }
-
-        .slot.drag-over { border-color: #10b981; background-color: rgba(16, 185, 129, 0.2); }
-        .slot:hover { border-color: var(--gold); }
-        .slot.has-image { border-color: var(--gold); }
-        .slot input { display: none; }
-        
-        .slot-text { color: rgba(255,255,255,0.4); font-size: 24px; font-weight: bold; pointer-events: none; text-shadow: 2px 2px 4px #000; text-align: center; }
-        .slot.has-image .slot-text { display: none; }
-        .slot.stats-box { background-color: #232a5e; grid-column: span var(--statsCols); grid-row: span var(--statsRows); border-style: dashed; }
+        :root { --primary: #00d2ff; --accent: #e94560; --bg: #1a1a2e; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .card { background: #16213e; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 95%; max-width: 1000px; }
+        .path-info { background: #0f3460; padding: 10px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--primary); font-size: 14px; }
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
+        input { padding: 8px; border-radius: 4px; border: none; outline: none; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { flex: 1; cursor: pointer; padding: 12px; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
+        #btn-preview { background: var(--primary); color: #000; }
+        #btn-download { background: #28a745; color: white; display: none; }
+        .workspace { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        canvas { max-width: 100%; border: 1px solid #444; background: #000; }
+        .result-area { text-align: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; display: none; }
+        #cropCanvas { border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
     </style>
 </head>
 <body>
 
-    <div class="sidebar-left">
-        <h1>Cấu Hình Layout</h1>
-        <div class="control-group">
-            <label>MẬT ĐỘ TƯỚNG (2130x1806)</label>
-            <button class="tpl-btn active" data-id="t17">Mẫu 17 Tướng</button>
-            <button class="tpl-btn" data-id="t45">Mẫu 45 Tướng</button>
-            <button class="tpl-btn" data-id="t100">Mẫu 100 Tướng</button>
+<div class="card">
+    <h2>Cắt Ảnh Skin Tướng</h2>
+
+    <div class="path-info">
+        Cấu trúc nhận diện: <strong>Images / <span id="hero-display">Tên_Tướng</span> / [Ảnh_Bạn_Chọn]</strong>
+    </div>
+    
+    <div class="controls">
+        <div>
+            <label>Tên tướng (Thư mục):</label><br>
+            <input type="text" id="heroName" placeholder="Ví dụ: Sinestrea" oninput="updatePath()">
         </div>
-        <button id="downloadBtn" class="btn-success">⬇️ Xuất Ảnh Báo Cáo</button>
+        <div>
+            <label>Chọn ảnh trong thư mục:</label><br>
+            <input type="file" id="upload" accept="image/*">
+        </div>
+        <div><label>X:</label><input type="number" id="x" value="65"></div>
+        <div><label>Y:</label><input type="number" id="y" value="315"></div>
+        <div><label>Rộng:</label><input type="number" id="w" value="130"></div>
+        <div><label>Cao:</label><input type="number" id="h" value="225"></div>
+    </div>
+
+    <div class="btn-group">
+        <button id="btn-preview" onclick="processCrop()">1. XEM TRƯỚC VÙNG CẮT</button>
+        <button id="btn-download" onclick="downloadImage()">2. TẢI ẢNH RIÊNG</button>
     </div>
 
     <div class="workspace">
-        <div id="collage-wrapper">
-            <div id="collage-container">
-                <div class="banners-row" id="banners-container"></div>
-                <div class="grid-row" id="champs-container"></div>
-            </div>
+        <div style="text-align: center;">
+            <p style="font-size: 12px; color: #888;">ẢNH GỐC (VÙNG ĐỎ SẼ ĐƯỢC CẮT)</p>
+            <canvas id="mainCanvas"></canvas>
+        </div>
+
+        <div id="resultContainer" class="result-area">
+            <p style="color: var(--primary); font-weight: bold;">KẾT QUẢ ĐOẠN SKIN:</p>
+            <canvas id="cropCanvas"></canvas>
         </div>
     </div>
+</div>
 
-    <div class="sidebar-right">
-        <h2>KHO ẢNH HỆ THỐNG</h2>
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Nhập tên tướng/skin để tìm...">
-        <div class="gallery" id="gallery">
-            </div>
-    </div>
+<script>
+    const upload = document.getElementById('upload');
+    const mainCanvas = document.getElementById('mainCanvas');
+    const cropCanvas = document.getElementById('cropCanvas');
+    const btnDownload = document.getElementById('btn-download');
+    const resultContainer = document.getElementById('resultContainer');
+    const heroDisplay = document.getElementById('hero-display');
+    let originalImg = new Image();
 
-    <script>
-        const container = document.getElementById('collage-container');
-        const bannersContainer = document.getElementById('banners-container');
-        const champsContainer = document.getElementById('champs-container');
-        const wrapper = document.getElementById('collage-wrapper');
-        const gallery = document.getElementById('gallery');
-        const imageMap = new Map();
+    function updatePath() {
+        heroDisplay.innerText = document.getElementById('heroName').value || "Tên_Tướng";
+    }
 
-        // ================= DATABASE ẢNH CỦA BẠN =================
-        // NHẬP TÊN CÁC FILE ẢNH BẠN ĐÃ TẢI LÊN GITHUB VÀO ĐÂY:
-        const skinDatabase = [
-         "Valhein Mã Hành Vạn Lý.jpg",
-        "Valhein Thứ nguyên vệ thần.jpg",
-            
-            // Thêm tiếp tên file của bạn ở dưới, nhớ có dấu phẩy ở cuối mỗi dòng
-        ];
-        // ========================================================
-
-        const templates = {
-            't17': { cols: 7, rows: 3, statsCols: 4, statsRows: 1, gap: 24, pad: 30, bannerH: 260 },
-            't45': { cols: 10, rows: 5, statsCols: 5, statsRows: 1, gap: 16, pad: 25, bannerH: 260 },
-            't100': { cols: 14, rows: 8, statsCols: 6, statsRows: 2, gap: 6, pad: 20, bannerH: 260 }
-        };
-
-        function adjustScale() {
-            const workspace = document.querySelector('.workspace');
-            const availableW = workspace.clientWidth - 60;
-            const availableH = workspace.clientHeight - 60;
-            const scale = Math.min(availableW / 2130, availableH / 1806, 1);
-            wrapper.style.transform = `scale(${scale})`;
+    upload.addEventListener('change', function(e) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            originalImg.src = event.target.result;
         }
-        window.addEventListener('resize', adjustScale);
+        reader.readAsDataURL(e.target.files[0]);
+    });
 
-        function createSlotHTML(id, label, extraClass = '') {
-            return `<label class="slot ${extraClass}" data-id="${id}">
-                        <input type="file" accept="image/*">
-                        <span class="slot-text">${label}</span>
-                    </label>`;
-        }
+    originalImg.onload = function() {
+        renderMain();
+        resultContainer.style.display = 'none';
+        btnDownload.style.display = 'none';
+    };
 
-        function buildLayout(templateId) {
-            const cfg = templates[templateId];
-            container.style.setProperty('--cols', cfg.cols);
-            container.style.setProperty('--rows', cfg.rows);
-            container.style.setProperty('--statsCols', cfg.statsCols);
-            container.style.setProperty('--statsRows', cfg.statsRows);
-            container.style.setProperty('--gap', cfg.gap + 'px');
-            container.style.setProperty('--pad', cfg.pad + 'px');
-            container.style.setProperty('--bannerH', cfg.bannerH + 'px');
+    function renderMain() {
+        const ctx = mainCanvas.getContext('2d');
+        mainCanvas.width = originalImg.width;
+        mainCanvas.height = originalImg.height;
+        ctx.drawImage(originalImg, 0, 0);
+    }
 
-            bannersContainer.innerHTML = ''; champsContainer.innerHTML = ''; imageMap.clear();
+    function processCrop() {
+        if (!originalImg.src) return alert("Bạn chưa chọn ảnh!");
 
-            let bannersHTML = '';
-            for(let i=0; i<3; i++) bannersHTML += createSlotHTML(`banner_${i}`, '+ Banner');
-            bannersContainer.innerHTML = bannersHTML;
+        const x = parseInt(document.getElementById('x').value);
+        const y = parseInt(document.getElementById('y').value);
+        const w = parseInt(document.getElementById('w').value);
+        const h = parseInt(document.getElementById('h').value);
 
-            let champsHTML = '';
-            const totalArea = cfg.cols * cfg.rows;
-            const statsArea = cfg.statsCols * cfg.statsRows;
-            const statsIndexTrigger = Math.floor((cfg.rows - cfg.statsRows) / 2) * cfg.cols;
+        // Vẽ lại ảnh gốc và khung đỏ
+        renderMain();
+        const mainCtx = mainCanvas.getContext('2d');
+        mainCtx.strokeStyle = "#ff0000";
+        mainCtx.lineWidth = 8;
+        mainCtx.strokeRect(x, y, w, h);
 
-            let currentArea = 0, champCount = 0;
-            while (currentArea < totalArea) {
-                if (currentArea === statsIndexTrigger) {
-                    champsHTML += createSlotHTML('stats', 'Thả Khung<br>Thông Số', 'stats-box');
-                    currentArea += statsArea;
-                } else {
-                    champsHTML += createSlotHTML(`champ_${champCount}`, '+ Thả Ảnh');
-                    champCount++; currentArea++;
-                }
-            }
-            champsContainer.innerHTML = champsHTML;
-            adjustScale();
-        }
+        // Cắt ảnh
+        const cropCtx = cropCanvas.getContext('2d');
+        cropCanvas.width = w;
+        cropCanvas.height = h;
+        cropCtx.drawImage(originalImg, x, y, w, h, 0, 0, w, h);
 
-        document.querySelectorAll('.tpl-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                buildLayout(btn.dataset.id);
-            });
-        });
+        // Hiện vùng kết quả
+        resultContainer.style.display = 'block';
+        btnDownload.style.display = 'block';
+        
+        // Cuộn xuống để xem kết quả
+        resultContainer.scrollIntoView({ behavior: 'smooth' });
+    }
 
-        /* ================= HỆ THỐNG LOAD ẢNH CÓ SẴN ================= */
-        function loadDatabaseSkins() {
-            gallery.innerHTML = '';
-            skinDatabase.forEach(fileName => {
-                const img = document.createElement('img');
-                // Gọi thẳng tên file vì nó nằm chung chỗ với index.html trên GitHub
-                img.src = fileName; 
-                img.crossOrigin = "anonymous"; // Chống lỗi khi xuất ảnh
-                img.className = 'gallery-item';
-                img.draggable = true;
-                
-                // Cắt đuôi .jpg, .png và đổi dấu gạch ngang thành dấu cách để tìm kiếm dễ hơn
-                const searchName = fileName.split('.')[0].replace(/-/g, ' ').toLowerCase();
-                img.dataset.name = searchName;
-                img.title = searchName;
+    function downloadImage() {
+        const name = document.getElementById('heroName').value || ' tướng';
+        const link = document.createElement('a');
+        link.download = `Skin_${name}.png`;
+        link.href = cropCanvas.toDataURL('image/png');
+        link.click();
+    }
+</script>
 
-                img.addEventListener('dragstart', (dragEvent) => {
-                    dragEvent.dataTransfer.setData('text/plain', img.src);
-                });
-
-                // Nếu ảnh tải lỗi (do nhập sai tên file), ẩn ảnh đó đi
-                img.onerror = () => { img.style.display = 'none'; };
-
-                gallery.appendChild(img);
-            });
-        }
-
-        // Tìm kiếm
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('.gallery-item').forEach(img => {
-                img.style.display = img.dataset.name.includes(term) ? 'block' : 'none';
-            });
-        });
-
-        /* ================= KÉO THẢ VÀ XUẤT ẢNH ================= */
-        container.addEventListener('dragover', e => {
-            e.preventDefault();
-            const slot = e.target.closest('.slot');
-            if (slot) slot.classList.add('drag-over');
-        });
-
-        container.addEventListener('dragleave', e => {
-            const slot = e.target.closest('.slot');
-            if (slot) slot.classList.remove('drag-over');
-        });
-
-        container.addEventListener('drop', e => {
-            e.preventDefault();
-            const slot = e.target.closest('.slot');
-            if (!slot) return;
-            
-            slot.classList.remove('drag-over');
-            const imgSrc = e.dataTransfer.getData('text/plain');
-            
-            if(imgSrc) {
-                const img = new Image();
-                img.crossOrigin = "anonymous";
-                img.onload = function() {
-                    slot.style.backgroundImage = `url(${imgSrc})`;
-                    slot.classList.add('has-image');
-                    imageMap.set(slot.dataset.id, img);
-                }
-                img.src = imgSrc;
-            }
-        });
-
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 2130; canvas.height = 1806;
-
-            ctx.fillStyle = '#1a2042'; ctx.fillRect(0, 0, 2130, 1806);
-
-            document.querySelectorAll('.slot').forEach(slot => {
-                const id = slot.dataset.id;
-                const x = slot.offsetLeft, y = slot.offsetTop, w = slot.offsetWidth, h = slot.offsetHeight;
-
-                ctx.fillStyle = '#0f172a'; ctx.fillRect(x, y, w, h);
-
-                if (imageMap.has(id)) {
-                    const img = imageMap.get(id);
-                    const imgAspect = img.width / img.height;
-                    const slotAspect = w / h;
-                    let drawX = x, drawY = y, drawW = w, drawH = h;
-
-                    if (imgAspect > slotAspect) {
-                        drawW = h * imgAspect; drawX = x - (drawW - w) / 2;
-                    } else {
-                        drawH = w / imgAspect; drawY = y - (drawH - h) / 2;
-                    }
-
-                    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
-                    ctx.drawImage(img, drawX, drawY, drawW, drawH); ctx.restore();
-                }
-                ctx.strokeStyle = imageMap.has(id) ? '#d4af37' : '#475569';
-                ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
-            });
-
-            const link = document.createElement('a');
-            link.download = `Lien-Quan-2130x1806.png`;
-            link.href = canvas.toDataURL('image/png', 1.0);
-            link.click();
-        });
-
-        // Khởi chạy
-        loadDatabaseSkins();
-        buildLayout('t17'); 
-    </script>
 </body>
 </html>
-
-
-
-
-
