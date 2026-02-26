@@ -24,9 +24,9 @@
             overflow: hidden;
         }
 
-        /* ----- THANH ĐIỀU KHIỂN ----- */
-        .sidebar {
-            width: 320px;
+        /* ----- THANH ĐIỀU KHIỂN TRÁI ----- */
+        .sidebar-left {
+            width: 300px;
             background-color: var(--panel-bg);
             border-right: 1px solid var(--border-color);
             padding: 24px;
@@ -35,9 +35,10 @@
             gap: 20px;
             box-shadow: 2px 0 10px rgba(0,0,0,0.5);
             z-index: 10;
+            flex-shrink: 0;
         }
 
-        .sidebar h1 { font-size: 18px; margin: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; }
+        .sidebar-left h1 { font-size: 18px; margin: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; }
         .control-group label { font-size: 13px; color: #94a3b8; font-weight: bold; margin-bottom: 10px; display: block; }
 
         button {
@@ -52,6 +53,59 @@
         .btn-success { background-color: #10b981; border-color: #10b981; text-align: center; font-weight: bold; margin-top: auto; }
         .btn-success:hover { background-color: #059669; }
 
+        /* ----- KHO ẢNH PHẢI ----- */
+        .sidebar-right {
+            width: 320px;
+            background-color: var(--panel-bg);
+            border-left: 1px solid var(--border-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .sidebar-right h2 { font-size: 16px; margin: 0; color: var(--gold); }
+        
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: white;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        .gallery {
+            flex: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            padding-right: 5px;
+            align-content: start;
+        }
+
+        .gallery::-webkit-scrollbar { width: 6px; }
+        .gallery::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+
+        .gallery-item {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 6px;
+            cursor: grab;
+            border: 2px solid transparent;
+            transition: 0.2s;
+            background-color: #0f172a;
+        }
+        .gallery-item:hover { border-color: var(--accent-color); transform: scale(1.02); }
+        .gallery-item:active { cursor: grabbing; }
+
         /* ----- KHU VỰC LÀM VIỆC ----- */
         .workspace {
             flex: 1;
@@ -59,100 +113,49 @@
             justify-content: center;
             align-items: center;
             background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
-            overflow: hidden; /* Không cần cuộn vì đã có thuật toán scale */
-        }
-
-        #collage-wrapper {
-            transform-origin: center center;
-            transition: transform 0.3s ease;
-        }
-
-        /* KHUNG CHUẨN: Kích thước được khóa chết ở tỷ lệ 2130x1806 */
-        #collage-container {
-            width: 2130px;
-            height: 1806px;
-            background-color: #1a2042;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            
-            /* Các biến này sẽ được JS cập nhật động */
-            padding: var(--pad);
-            gap: var(--gap);
-        }
-
-        /* Hàng Banner trên cùng */
-        .banners-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--gap);
-            height: var(--bannerH);
-            flex-shrink: 0;
-        }
-
-        /* Lưới Tướng + Thông số (Tự động lấp đầy phần chiều cao còn lại) */
-        .grid-row {
-            display: grid;
-            grid-template-columns: repeat(var(--cols), 1fr);
-            grid-template-rows: repeat(var(--rows), 1fr);
-            gap: var(--gap);
-            flex-grow: 1;
-        }
-
-        /* Thiết kế từng ô trống */
-        .slot {
-            background-color: #0f172a;
-            border: 3px solid #475569;
-            position: relative;
-            cursor: pointer;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: border-color 0.2s;
             overflow: hidden;
-            box-sizing: border-box;
         }
 
+        #collage-wrapper { transform-origin: center center; transition: transform 0.3s ease; }
+        
+        #collage-container {
+            width: 2130px; height: 1806px; background-color: #1a2042;
+            box-sizing: border-box; display: flex; flex-direction: column;
+            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            padding: var(--pad); gap: var(--gap);
+        }
+
+        .banners-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); height: var(--bannerH); flex-shrink: 0; }
+        .grid-row { display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr); gap: var(--gap); flex-grow: 1; }
+
+        .slot {
+            background-color: #0f172a; border: 3px solid #475569; position: relative;
+            cursor: pointer; background-size: cover; background-position: center;
+            display: flex; justify-content: center; align-items: center;
+            transition: border-color 0.2s; overflow: hidden; box-sizing: border-box;
+        }
+
+        .slot.drag-over { border-color: #10b981; background-color: rgba(16, 185, 129, 0.2); }
         .slot:hover { border-color: var(--gold); }
         .slot.has-image { border-color: var(--gold); }
         .slot input { display: none; }
         
-        .slot-text {
-            color: rgba(255,255,255,0.4);
-            font-size: 24px;
-            font-weight: bold;
-            pointer-events: none;
-            text-shadow: 2px 2px 4px #000;
-        }
+        .slot-text { color: rgba(255,255,255,0.4); font-size: 24px; font-weight: bold; pointer-events: none; text-shadow: 2px 2px 4px #000; text-align: center; }
         .slot.has-image .slot-text { display: none; }
-
-        /* Ô đặc biệt (Thông số) */
-        .slot.stats-box {
-            background-color: #232a5e;
-            grid-column: span var(--statsCols);
-            grid-row: span var(--statsRows);
-            border-style: dashed;
-        }
-
+        .slot.stats-box { background-color: #232a5e; grid-column: span var(--statsCols); grid-row: span var(--statsRows); border-style: dashed; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h1>Cấu Hình Layout Chuẩn</h1>
-        
+    <div class="sidebar-left">
+        <h1>Cấu Hình Layout</h1>
         <div class="control-group">
             <label>MẬT ĐỘ TƯỚNG (2130x1806)</label>
-            <button class="tpl-btn active" data-id="t17">Mẫu 17 Tướng (Khoảng trống to)</button>
-            <button class="tpl-btn" data-id="t45">Mẫu 45 Tướng (Khoảng trống vừa)</button>
-            <button class="tpl-btn" data-id="t100">Mẫu 100 Tướng (Xếp khít nhau)</button>
+            <button class="tpl-btn active" data-id="t17">Mẫu 17 Tướng</button>
+            <button class="tpl-btn" data-id="t45">Mẫu 45 Tướng</button>
+            <button class="tpl-btn" data-id="t100">Mẫu 100 Tướng</button>
         </div>
-
-        <button id="downloadBtn" class="btn-success">⬇️ Xuất Ảnh Facebook Cực Nét</button>
+        <button id="downloadBtn" class="btn-success">⬇️ Xuất Ảnh Báo Cáo</button>
     </div>
 
     <div class="workspace">
@@ -164,36 +167,46 @@
         </div>
     </div>
 
+    <div class="sidebar-right">
+        <h2>KHO ẢNH HỆ THỐNG</h2>
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Nhập tên tướng/skin để tìm...">
+        <div class="gallery" id="gallery">
+            </div>
+    </div>
+
     <script>
         const container = document.getElementById('collage-container');
         const bannersContainer = document.getElementById('banners-container');
         const champsContainer = document.getElementById('champs-container');
         const wrapper = document.getElementById('collage-wrapper');
+        const gallery = document.getElementById('gallery');
         const imageMap = new Map();
 
-        // TỪ ĐIỂN TỶ LỆ: Quy định mọi kích thước toán học
+        // ================= DATABASE ẢNH CỦA BẠN =================
+        // NHẬP TÊN CÁC FILE ẢNH BẠN ĐÃ TẢI LÊN GITHUB VÀO ĐÂY:
+        const skinDatabase = [
+            "nakroth-thu-nguyen-ve-than.jpg",
+            "tulen-chi-ton.png",
+            "valhein-vu-khi-toi-thuong.jpg",
+            // Thêm tiếp tên file của bạn ở dưới, nhớ có dấu phẩy ở cuối mỗi dòng
+        ];
+        // ========================================================
+
         const templates = {
             't17': { cols: 7, rows: 3, statsCols: 4, statsRows: 1, gap: 24, pad: 30, bannerH: 260 },
             't45': { cols: 10, rows: 5, statsCols: 5, statsRows: 1, gap: 16, pad: 25, bannerH: 260 },
             't100': { cols: 14, rows: 8, statsCols: 6, statsRows: 2, gap: 6, pad: 20, bannerH: 260 }
         };
 
-        // Hàm giúp hiển thị vừa màn hình máy tính của bạn
         function adjustScale() {
             const workspace = document.querySelector('.workspace');
-            const availableW = workspace.clientWidth - 80;
-            const availableH = workspace.clientHeight - 80;
-            
-            // Tính toán tỷ lệ thu nhỏ để nhét vừa khối 2130x1806 vào màn hình hiện tại
-            const scaleW = availableW / 2130;
-            const scaleH = availableH / 1806;
-            const scale = Math.min(scaleW, scaleH, 1); // Không phóng to quá 100%
-            
+            const availableW = workspace.clientWidth - 60;
+            const availableH = workspace.clientHeight - 60;
+            const scale = Math.min(availableW / 2130, availableH / 1806, 1);
             wrapper.style.transform = `scale(${scale})`;
         }
         window.addEventListener('resize', adjustScale);
 
-        // Hàm tạo 1 ô trống (slot)
         function createSlotHTML(id, label, extraClass = '') {
             return `<label class="slot ${extraClass}" data-id="${id}">
                         <input type="file" accept="image/*">
@@ -201,11 +214,8 @@
                     </label>`;
         }
 
-        // Trái tim của thuật toán: Tính toán và vẽ lưới
         function buildLayout(templateId) {
             const cfg = templates[templateId];
-            
-            // 1. Áp dụng CSS Variables để Grid tự chia tỷ lệ
             container.style.setProperty('--cols', cfg.cols);
             container.style.setProperty('--rows', cfg.rows);
             container.style.setProperty('--statsCols', cfg.statsCols);
@@ -214,113 +224,119 @@
             container.style.setProperty('--pad', cfg.pad + 'px');
             container.style.setProperty('--bannerH', cfg.bannerH + 'px');
 
-            // Xóa dữ liệu cũ
-            bannersContainer.innerHTML = '';
-            champsContainer.innerHTML = '';
-            imageMap.clear();
+            bannersContainer.innerHTML = ''; champsContainer.innerHTML = ''; imageMap.clear();
 
-            // 2. Tạo 3 Banners cố định
             let bannersHTML = '';
             for(let i=0; i<3; i++) bannersHTML += createSlotHTML(`banner_${i}`, '+ Banner');
             bannersContainer.innerHTML = bannersHTML;
 
-            // 3. Tính toán vị trí đặt khung Thông Số (Luôn đặt ở giữa lưới)
             let champsHTML = '';
             const totalArea = cfg.cols * cfg.rows;
             const statsArea = cfg.statsCols * cfg.statsRows;
-            
-            // Tìm hàng để đặt khung Stats sao cho cân đối nhất
-            const statsStartRow = Math.floor((cfg.rows - cfg.statsRows) / 2);
-            const statsIndexTrigger = statsStartRow * cfg.cols;
+            const statsIndexTrigger = Math.floor((cfg.rows - cfg.statsRows) / 2) * cfg.cols;
 
-            let currentArea = 0;
-            let champCount = 0;
-
-            // Vòng lặp rải DOM, CSS Grid sẽ tự động xếp chúng vào đúng tọa độ
+            let currentArea = 0, champCount = 0;
             while (currentArea < totalArea) {
                 if (currentArea === statsIndexTrigger) {
-                    champsHTML += createSlotHTML('stats', '+ Ảnh Thông Số (To)', 'stats-box');
+                    champsHTML += createSlotHTML('stats', 'Thả Khung<br>Thông Số', 'stats-box');
                     currentArea += statsArea;
                 } else {
-                    champsHTML += createSlotHTML(`champ_${champCount}`, '+ Tướng');
-                    champCount++;
-                    currentArea++;
+                    champsHTML += createSlotHTML(`champ_${champCount}`, '+ Thả Ảnh');
+                    champCount++; currentArea++;
                 }
             }
             champsContainer.innerHTML = champsHTML;
             adjustScale();
         }
 
-        // Chuyển đổi Template
         document.querySelectorAll('.tpl-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                if(confirm("Lưu ý: Đổi mẫu sẽ làm trống các ảnh hiện tại. Bạn tiếp tục chứ?")) {
-                    buildLayout(btn.dataset.id);
-                } else {
-                    btn.classList.remove('active');
-                }
+                buildLayout(btn.dataset.id);
             });
         });
 
-        // Xử lý Upload và lưu trữ Image để xuất file
-        container.addEventListener('change', function(e) {
-            if (e.target.tagName.toLowerCase() === 'input' && e.target.type === 'file') {
-                const file = e.target.files[0];
-                if (!file) return;
+        /* ================= HỆ THỐNG LOAD ẢNH CÓ SẴN ================= */
+        function loadDatabaseSkins() {
+            gallery.innerHTML = '';
+            skinDatabase.forEach(fileName => {
+                const img = document.createElement('img');
+                // Gọi thẳng tên file vì nó nằm chung chỗ với index.html trên GitHub
+                img.src = fileName; 
+                img.crossOrigin = "anonymous"; // Chống lỗi khi xuất ảnh
+                img.className = 'gallery-item';
+                img.draggable = true;
+                
+                // Cắt đuôi .jpg, .png và đổi dấu gạch ngang thành dấu cách để tìm kiếm dễ hơn
+                const searchName = fileName.split('.')[0].replace(/-/g, ' ').toLowerCase();
+                img.dataset.name = searchName;
+                img.title = searchName;
 
-                const slot = e.target.parentElement;
-                const id = slot.dataset.id;
+                img.addEventListener('dragstart', (dragEvent) => {
+                    dragEvent.dataTransfer.setData('text/plain', img.src);
+                });
 
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        slot.style.backgroundImage = `url(${event.target.result})`;
-                        slot.classList.add('has-image');
-                        imageMap.set(id, img);
-                    }
-                    img.src = event.target.result;
+                // Nếu ảnh tải lỗi (do nhập sai tên file), ẩn ảnh đó đi
+                img.onerror = () => { img.style.display = 'none'; };
+
+                gallery.appendChild(img);
+            });
+        }
+
+        // Tìm kiếm
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('.gallery-item').forEach(img => {
+                img.style.display = img.dataset.name.includes(term) ? 'block' : 'none';
+            });
+        });
+
+        /* ================= KÉO THẢ VÀ XUẤT ẢNH ================= */
+        container.addEventListener('dragover', e => {
+            e.preventDefault();
+            const slot = e.target.closest('.slot');
+            if (slot) slot.classList.add('drag-over');
+        });
+
+        container.addEventListener('dragleave', e => {
+            const slot = e.target.closest('.slot');
+            if (slot) slot.classList.remove('drag-over');
+        });
+
+        container.addEventListener('drop', e => {
+            e.preventDefault();
+            const slot = e.target.closest('.slot');
+            if (!slot) return;
+            
+            slot.classList.remove('drag-over');
+            const imgSrc = e.dataTransfer.getData('text/plain');
+            
+            if(imgSrc) {
+                const img = new Image();
+                img.crossOrigin = "anonymous";
+                img.onload = function() {
+                    slot.style.backgroundImage = `url(${imgSrc})`;
+                    slot.classList.add('has-image');
+                    imageMap.set(slot.dataset.id, img);
                 }
-                reader.readAsDataURL(file);
-                e.target.value = '';
+                img.src = imgSrc;
             }
         });
 
-        // Thuật toán Canvas Đỉnh Cao: Lấy kích thước gốc KHÔNG bị ảnh hưởng bởi Scale
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
+            canvas.width = 2130; canvas.height = 1806;
 
-            // Cố định cứng kích thước xuất ra: 2130x1806 
-            // (Bạn có thể nhân x1.5 hoặc x2 chỗ này nếu muốn nét hơn nữa, thuật toán vẫn chạy đúng)
-            const exportW = 2130;
-            const exportH = 1806;
-            canvas.width = exportW;
-            canvas.height = exportH;
+            ctx.fillStyle = '#1a2042'; ctx.fillRect(0, 0, 2130, 1806);
 
-            // Tô nền chính
-            ctx.fillStyle = '#1a2042';
-            ctx.fillRect(0, 0, exportW, exportH);
-
-            const slots = document.querySelectorAll('.slot');
-            
-            slots.forEach(slot => {
+            document.querySelectorAll('.slot').forEach(slot => {
                 const id = slot.dataset.id;
-                
-                // offsetLeft và offsetTop lấy đúng tọa độ px chuẩn trên tỷ lệ 2130x1806
-                // Nó hoàn toàn phớt lờ lệnh css transform: scale() nên hình vẽ ra chính xác 100%
-                const x = slot.offsetLeft;
-                const y = slot.offsetTop;
-                const w = slot.offsetWidth;
-                const h = slot.offsetHeight;
+                const x = slot.offsetLeft, y = slot.offsetTop, w = slot.offsetWidth, h = slot.offsetHeight;
 
-                // Nền slot
-                ctx.fillStyle = '#0f172a';
-                ctx.fillRect(x, y, w, h);
+                ctx.fillStyle = '#0f172a'; ctx.fillRect(x, y, w, h);
 
-                // Cắt ảnh cover
                 if (imageMap.has(id)) {
                     const img = imageMap.get(id);
                     const imgAspect = img.width / img.height;
@@ -328,37 +344,27 @@
                     let drawX = x, drawY = y, drawW = w, drawH = h;
 
                     if (imgAspect > slotAspect) {
-                        drawW = h * imgAspect;
-                        drawX = x - (drawW - w) / 2;
+                        drawW = h * imgAspect; drawX = x - (drawW - w) / 2;
                     } else {
-                        drawH = w / imgAspect;
-                        drawY = y - (drawH - h) / 2;
+                        drawH = w / imgAspect; drawY = y - (drawH - h) / 2;
                     }
 
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.rect(x, y, w, h);
-                    ctx.clip();
-                    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-                    ctx.restore();
+                    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+                    ctx.drawImage(img, drawX, drawY, drawW, drawH); ctx.restore();
                 }
-
-                // Vẽ viền
                 ctx.strokeStyle = imageMap.has(id) ? '#d4af37' : '#475569';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(x, y, w, h);
+                ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
             });
 
-            // Tải về
             const link = document.createElement('a');
-            link.download = `bo-suu-tap-lien-quan-2130x1806.png`;
+            link.download = `Lien-Quan-2130x1806.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
         });
 
-        // Khởi động mẫu 17 tướng
+        // Khởi chạy
+        loadDatabaseSkins();
         buildLayout('t17'); 
     </script>
 </body>
-
 </html>
