@@ -80,18 +80,6 @@
             font-size: 14px;
         }
 
-        .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .upload-btn-wrapper .btn-upload {
-            border: 2px dashed #94a3b8;
-            color: #94a3b8; background-color: transparent;
-            padding: 12px; border-radius: 8px; font-weight: bold; text-align: center; cursor: pointer; width: 100%;
-        }
-        .upload-btn-wrapper .btn-upload:hover { border-color: var(--accent-color); color: var(--text-main); }
-        .upload-btn-wrapper input[type=file] {
-            font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%;
-        }
-
-        /* Lưới chứa ảnh trong Kho */
         .gallery {
             flex: 1;
             overflow-y: auto;
@@ -102,18 +90,18 @@
             align-content: start;
         }
 
-        /* Tùy chỉnh thanh cuộn cho đẹp */
         .gallery::-webkit-scrollbar { width: 6px; }
         .gallery::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
 
         .gallery-item {
             width: 100%;
-            aspect-ratio: 1; /* Cố định ảnh hình vuông trong kho cho gọn */
+            aspect-ratio: 1;
             object-fit: cover;
             border-radius: 6px;
             cursor: grab;
             border: 2px solid transparent;
             transition: 0.2s;
+            background-color: #0f172a;
         }
         .gallery-item:hover { border-color: var(--accent-color); transform: scale(1.02); }
         .gallery-item:active { cursor: grabbing; }
@@ -128,52 +116,33 @@
             overflow: hidden;
         }
 
-        #collage-wrapper {
-            transform-origin: center center;
-            transition: transform 0.3s ease;
-        }
-
+        #collage-wrapper { transform-origin: center center; transition: transform 0.3s ease; }
+        
         #collage-container {
-            width: 2130px;
-            height: 1806px;
-            background-color: #1a2042;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            padding: var(--pad);
-            gap: var(--gap);
+            width: 2130px; height: 1806px; background-color: #1a2042;
+            box-sizing: border-box; display: flex; flex-direction: column;
+            position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            padding: var(--pad); gap: var(--gap);
         }
 
         .banners-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); height: var(--bannerH); flex-shrink: 0; }
         .grid-row { display: grid; grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr); gap: var(--gap); flex-grow: 1; }
 
         .slot {
-            background-color: #0f172a;
-            border: 3px solid #475569;
-            position: relative;
-            cursor: pointer;
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: border-color 0.2s;
-            overflow: hidden;
-            box-sizing: border-box;
+            background-color: #0f172a; border: 3px solid #475569; position: relative;
+            cursor: pointer; background-size: cover; background-position: center;
+            display: flex; justify-content: center; align-items: center;
+            transition: border-color 0.2s; overflow: hidden; box-sizing: border-box;
         }
 
-        .slot.drag-over { border-color: #10b981; background-color: rgba(16, 185, 129, 0.2); } /* Hiệu ứng khi kéo ảnh vào ô */
+        .slot.drag-over { border-color: #10b981; background-color: rgba(16, 185, 129, 0.2); }
         .slot:hover { border-color: var(--gold); }
         .slot.has-image { border-color: var(--gold); }
         .slot input { display: none; }
         
         .slot-text { color: rgba(255,255,255,0.4); font-size: 24px; font-weight: bold; pointer-events: none; text-shadow: 2px 2px 4px #000; text-align: center; }
         .slot.has-image .slot-text { display: none; }
-
         .slot.stats-box { background-color: #232a5e; grid-column: span var(--statsCols); grid-row: span var(--statsRows); border-style: dashed; }
-
     </style>
 </head>
 <body>
@@ -199,14 +168,8 @@
     </div>
 
     <div class="sidebar-right">
-        <h2>KHO ẢNH SKIN</h2>
+        <h2>KHO ẢNH HỆ THỐNG</h2>
         <input type="text" id="searchInput" class="search-box" placeholder="🔍 Nhập tên tướng/skin để tìm...">
-        
-        <div class="upload-btn-wrapper">
-            <div class="btn-upload">+ Tải ảnh lên kho (Chọn nhiều file)</div>
-            <input type="file" id="bulkUpload" multiple accept="image/*">
-        </div>
-
         <div class="gallery" id="gallery">
             </div>
     </div>
@@ -219,6 +182,16 @@
         const gallery = document.getElementById('gallery');
         const imageMap = new Map();
 
+        // ================= DATABASE ẢNH CỦA BẠN =================
+        // NHẬP TÊN CÁC FILE ẢNH BẠN ĐÃ TẢI LÊN GITHUB VÀO ĐÂY:
+        const skinDatabase = [
+            "nakroth-thu-nguyen-ve-than.jpg",
+            "tulen-chi-ton.png",
+            "valhein-vu-khi-toi-thuong.jpg",
+            // Thêm tiếp tên file của bạn ở dưới, nhớ có dấu phẩy ở cuối mỗi dòng
+        ];
+        // ========================================================
+
         const templates = {
             't17': { cols: 7, rows: 3, statsCols: 4, statsRows: 1, gap: 24, pad: 30, bannerH: 260 },
             't45': { cols: 10, rows: 5, statsCols: 5, statsRows: 1, gap: 16, pad: 25, bannerH: 260 },
@@ -229,9 +202,8 @@
             const workspace = document.querySelector('.workspace');
             const availableW = workspace.clientWidth - 60;
             const availableH = workspace.clientHeight - 60;
-            const scaleW = availableW / 2130;
-            const scaleH = availableH / 1806;
-            wrapper.style.transform = `scale(${Math.min(scaleW, scaleH, 1)})`;
+            const scale = Math.min(availableW / 2130, availableH / 1806, 1);
+            wrapper.style.transform = `scale(${scale})`;
         }
         window.addEventListener('resize', adjustScale);
 
@@ -261,8 +233,7 @@
             let champsHTML = '';
             const totalArea = cfg.cols * cfg.rows;
             const statsArea = cfg.statsCols * cfg.statsRows;
-            const statsStartRow = Math.floor((cfg.rows - cfg.statsRows) / 2);
-            const statsIndexTrigger = statsStartRow * cfg.cols;
+            const statsIndexTrigger = Math.floor((cfg.rows - cfg.statsRows) / 2) * cfg.cols;
 
             let currentArea = 0, champCount = 0;
             while (currentArea < totalArea) {
@@ -271,8 +242,7 @@
                     currentArea += statsArea;
                 } else {
                     champsHTML += createSlotHTML(`champ_${champCount}`, '+ Thả Ảnh');
-                    champCount++;
-                    currentArea++;
+                    champCount++; currentArea++;
                 }
             }
             champsContainer.innerHTML = champsHTML;
@@ -283,55 +253,46 @@
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                if(confirm("Đổi mẫu sẽ làm trống các ảnh đang ghép. Kho ảnh bên phải vẫn giữ nguyên. Tiếp tục?")) {
-                    buildLayout(btn.dataset.id);
-                } else {
-                    btn.classList.remove('active');
-                }
+                buildLayout(btn.dataset.id);
             });
         });
 
-        /* ================= KHO ẢNH (BÊN PHẢI) ================= */
-        // 1. Tải nhiều ảnh lên kho
-        document.getElementById('bulkUpload').addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            files.forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = document.createElement('img');
-                    img.src = event.target.result;
-                    img.className = 'gallery-item';
-                    img.draggable = true; // Cho phép kéo
-                    img.dataset.name = file.name.toLowerCase(); // Lưu tên để tìm kiếm
-                    img.title = file.name;
+        /* ================= HỆ THỐNG LOAD ẢNH CÓ SẴN ================= */
+        function loadDatabaseSkins() {
+            gallery.innerHTML = '';
+            skinDatabase.forEach(fileName => {
+                const img = document.createElement('img');
+                // Gọi thẳng tên file vì nó nằm chung chỗ với index.html trên GitHub
+                img.src = fileName; 
+                img.crossOrigin = "anonymous"; // Chống lỗi khi xuất ảnh
+                img.className = 'gallery-item';
+                img.draggable = true;
+                
+                // Cắt đuôi .jpg, .png và đổi dấu gạch ngang thành dấu cách để tìm kiếm dễ hơn
+                const searchName = fileName.split('.')[0].replace(/-/g, ' ').toLowerCase();
+                img.dataset.name = searchName;
+                img.title = searchName;
 
-                    // Lưu dữ liệu ảnh khi bắt đầu kéo
-                    img.addEventListener('dragstart', (dragEvent) => {
-                        dragEvent.dataTransfer.setData('text/plain', event.target.result);
-                    });
+                img.addEventListener('dragstart', (dragEvent) => {
+                    dragEvent.dataTransfer.setData('text/plain', img.src);
+                });
 
-                    gallery.appendChild(img);
-                };
-                reader.readAsDataURL(file);
+                // Nếu ảnh tải lỗi (do nhập sai tên file), ẩn ảnh đó đi
+                img.onerror = () => { img.style.display = 'none'; };
+
+                gallery.appendChild(img);
             });
-            e.target.value = ''; // Reset input
-        });
+        }
 
-        // 2. Tìm kiếm ảnh trong kho
+        // Tìm kiếm
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const term = e.target.value.toLowerCase();
-            const imgs = document.querySelectorAll('.gallery-item');
-            imgs.forEach(img => {
-                if(img.dataset.name.includes(term)) {
-                    img.style.display = 'block';
-                } else {
-                    img.style.display = 'none';
-                }
+            document.querySelectorAll('.gallery-item').forEach(img => {
+                img.style.display = img.dataset.name.includes(term) ? 'block' : 'none';
             });
         });
 
-        /* ================= CHỨC NĂNG KÉO THẢ VÀO Ô ================= */
-        // Ngăn chặn hành vi mặc định để cho phép Thả
+        /* ================= KÉO THẢ VÀ XUẤT ẢNH ================= */
         container.addEventListener('dragover', e => {
             e.preventDefault();
             const slot = e.target.closest('.slot');
@@ -343,17 +304,17 @@
             if (slot) slot.classList.remove('drag-over');
         });
 
-        // Xử lý khi Thả ảnh vào ô
         container.addEventListener('drop', e => {
             e.preventDefault();
             const slot = e.target.closest('.slot');
             if (!slot) return;
             
             slot.classList.remove('drag-over');
-            const imgSrc = e.dataTransfer.getData('text/plain'); // Lấy Data URL của ảnh
+            const imgSrc = e.dataTransfer.getData('text/plain');
             
             if(imgSrc) {
                 const img = new Image();
+                img.crossOrigin = "anonymous";
                 img.onload = function() {
                     slot.style.backgroundImage = `url(${imgSrc})`;
                     slot.classList.add('has-image');
@@ -363,39 +324,14 @@
             }
         });
 
-        // Vẫn giữ tính năng Click vào ô để tải 1 ảnh (như cũ)
-        container.addEventListener('change', function(e) {
-            if (e.target.tagName.toLowerCase() === 'input' && e.target.type === 'file') {
-                const file = e.target.files[0];
-                if (!file) return;
-                const slot = e.target.parentElement;
-                const id = slot.dataset.id;
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        slot.style.backgroundImage = `url(${event.target.result})`;
-                        slot.classList.add('has-image');
-                        imageMap.set(id, img);
-                    }
-                    img.src = event.target.result;
-                }
-                reader.readAsDataURL(file);
-                e.target.value = '';
-            }
-        });
-
-        // Canvas Export (Giữ nguyên thuật toán xuất chuẩn 2130x1806)
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            const exportW = 2130, exportH = 1806;
-            canvas.width = exportW; canvas.height = exportH;
+            canvas.width = 2130; canvas.height = 1806;
 
-            ctx.fillStyle = '#1a2042'; ctx.fillRect(0, 0, exportW, exportH);
+            ctx.fillStyle = '#1a2042'; ctx.fillRect(0, 0, 2130, 1806);
 
-            const slots = document.querySelectorAll('.slot');
-            slots.forEach(slot => {
+            document.querySelectorAll('.slot').forEach(slot => {
                 const id = slot.dataset.id;
                 const x = slot.offsetLeft, y = slot.offsetTop, w = slot.offsetWidth, h = slot.offsetHeight;
 
@@ -421,11 +357,13 @@
             });
 
             const link = document.createElement('a');
-            link.download = `bo-suu-tap-lien-quan-2130x1806.png`;
+            link.download = `Lien-Quan-2130x1806.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
         });
 
+        // Khởi chạy
+        loadDatabaseSkins();
         buildLayout('t17'); 
     </script>
 </body>
