@@ -198,23 +198,43 @@
         }
 
         // LOAD KHO ẢNH TỪ THƯ MỤC IMAGER
-        function loadGallery() {
-            gallery.innerHTML = '';
-            danhSachTuong.forEach(tuong => {
-                for (let i = 1; i <= soSkinMoiTuong; i++) {
-                    const img = document.createElement('img');
-                    const src = `imager/${tuong}/${i}.jpg`;
-                    img.src = src;
-                    img.className = 'gallery-item';
-                    img.dataset.name = tuong;
-                    img.draggable = true;
-                    img.crossOrigin = "anonymous";
-                    img.addEventListener('dragstart', e => e.dataTransfer.setData('text', src));
-                    img.onerror = () => img.remove();
-                    gallery.appendChild(img);
-                }
+      function loadGallery() {
+    gallery.innerHTML = '';
+    
+    // 1. Kiểm tra lại danh sách này, phải khớp 100% tên thư mục trên GitHub
+    // Ví dụ: ["sines", "nak", "valhein", "tulen", "airi", "raz", "florentino"]
+    const danhSachTuong = ["sines", "nak"]; 
+    
+    const soSkinToiDa = 20; // Số lượng ảnh tối đa trong 1 thư mục tướng
+
+    danhSachTuong.forEach(tuong => {
+        for (let i = 1; i <= soSkinToiDa; i++) {
+            // Thử cả 2 đuôi file phổ biến để không bị sót
+            [".png", ".jpg"].forEach(duoi => {
+                const img = document.createElement('img');
+                
+                // CHÚ Ý: Đổi 'imager' thành 'images' nếu thư mục của bạn là images
+                const src = `images/${tuong}/${i}${duoi}`; 
+                
+                img.src = src;
+                img.className = 'gallery-item';
+                img.dataset.name = `${tuong} ${i}`; // Để tìm kiếm theo tên tướng
+                img.draggable = true;
+                img.crossOrigin = "anonymous";
+                
+                // Xử lý kéo thả
+                img.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', src);
+                });
+
+                // Nếu không thấy ảnh (sai tên, sai đuôi, hoặc chưa up) thì tự xóa bỏ
+                img.onerror = () => { img.remove(); };
+                
+                gallery.appendChild(img);
             });
         }
+    });
+}
 
         // XỬ LÝ KÉO THẢ
         container.addEventListener('dragover', e => {
@@ -291,3 +311,4 @@
     </script>
 </body>
 </html>
+
