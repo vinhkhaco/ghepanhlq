@@ -2,176 +2,176 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Tool Cắt Skin Liên Quân - Theo Thư Mục</title>
+    <title>Studio Ghép Ảnh Liên Quân - Fix Kho Ảnh</title>
     <style>
-        :root { --primary: #00d2ff; --accent: #e94560; --bg: #1a1a2e; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .card { background: #16213e; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 95%; max-width: 1000px; }
-        .path-info { background: #0f3460; padding: 10px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--primary); font-size: 14px; }
-        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 20px; }
-        input { padding: 8px; border-radius: 4px; border: none; outline: none; }
-        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        button { flex: 1; cursor: pointer; padding: 12px; border: none; border-radius: 6px; font-weight: bold; transition: 0.2s; }
-        #btn-preview { background: var(--primary); color: #000; }
-        #btn-download { background: #28a745; color: white; display: none; }
-        .workspace { display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        canvas { max-width: 100%; border: 1px solid #444; background: #000; }
-        .result-area { text-align: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; display: none; }
-        #cropCanvas { border: 2px solid var(--primary); box-shadow: 0 0 15px var(--primary); }
+        :root { --bg: #0f172a; --card: #1e293b; --primary: #3b82f6; --accent: #ef4444; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Layout chính */
+        .sidebar-left { width: 300px; background: var(--card); padding: 20px; border-right: 1px solid #334155; overflow-y: auto; }
+        .main-content { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+        .sidebar-right { width: 300px; background: var(--card); padding: 20px; border-left: 1px solid #334155; display: flex; flex-direction: column; }
+
+        /* Kho ảnh bên phải */
+        .kho-anh-list { flex: 1; overflow-y: auto; margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .thumb-item { width: 100%; aspect-ratio: 2/3; background: #000; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; object-fit: cover; }
+        .thumb-item:hover { border-color: var(--primary); transform: scale(1.05); }
+
+        /* Vùng cắt ảnh */
+        canvas { max-width: 100%; background: #000; border-radius: 8px; margin-bottom: 10px; }
+        input[type="number"] { width: 60px; padding: 5px; border-radius: 4px; border: none; }
+        .btn { cursor: pointer; padding: 10px 15px; border: none; border-radius: 5px; font-weight: bold; margin: 5px 0; width: 100%; }
+        .btn-preview { background: var(--primary); color: white; }
+        .btn-download { background: #10b981; color: white; display: none; }
+
+        /* Search bar */
+        .search-box { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #334155; background: #0f172a; color: white; }
+        h3 { font-size: 14px; color: #94a3b8; text-transform: uppercase; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Cắt Ảnh Skin Tướng</h2>
-
-    <div class="path-info">
-        Cấu trúc nhận diện: <strong>Images / <span id="hero-display">Tên_Tướng</span> / [Ảnh_Bạn_Chọn]</strong>
-    </div>
-    
-    <div class="controls">
-        <div>
-            <label>Tên tướng (Thư mục):</label><br>
-            <input type="text" id="heroName" placeholder="Ví dụ: Sinestrea" oninput="updatePath()">
-        </div>
-        <div>
-            <label>Chọn ảnh trong thư mục:</label><br>
-            <input type="file" id="upload" accept="image/*">
-        </div>
-        <div><label>X:</label><input type="number" id="x" value="65"></div>
-        <div><label>Y:</label><input type="number" id="y" value="315"></div>
-        <div><label>Rộng:</label><input type="number" id="w" value="130"></div>
-        <div><label>Cao:</label><input type="number" id="h" value="225"></div>
-    </div>
-
-    <div class="btn-group">
-        <button id="btn-preview" onclick="processCrop()">1. XEM TRƯỚC VÙNG CẮT</button>
-        <button id="btn-download" onclick="downloadImage()">2. TẢI ẢNH RIÊNG</button>
-    </div>
-
-    <div class="workspace">
-        <div style="text-align: center;">
-            <p style="font-size: 12px; color: #888;">ẢNH GỐC (VÙNG ĐỎ SẼ ĐƯỢC CẮT)</p>
-            <canvas id="mainCanvas"></canvas>
+    <div class="sidebar-left">
+        <h3>Cấu hình Cắt Ảnh</h3>
+        <input type="file" id="upload" accept="image/*" class="btn" style="background: #334155;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+            <div><label>X</label><br><input type="number" id="x" value="65"></div>
+            <div><label>Y</label><br><input type="number" id="y" value="315"></div>
+            <div><label>Rộng</label><br><input type="number" id="w" value="130"></div>
+            <div><label>Cao</label><br><input type="number" id="h" value="225"></div>
         </div>
 
-        <div id="resultContainer" class="result-area">
-            <p style="color: var(--primary); font-weight: bold;">KẾT QUẢ ĐOẠN SKIN:</p>
+        <button class="btn btn-preview" onclick="processCrop()">Xem trước & Cắt</button>
+        <button id="btn-download" class="btn btn-download" onclick="downloadImage()">Tải Skin Riêng</button>
+        
+        <hr style="border: 0.5px solid #334155; margin: 20px 0;">
+        <p style="font-size: 12px; color: #888;">* Chỉnh X, Y để di chuyển khung đỏ vào đúng vị trí thẻ skin.</p>
+    </div>
+
+    <div class="main-content">
+        <h3>Preview Gốc</h3>
+        <canvas id="mainCanvas"></canvas>
+        
+        <div id="resultArea" style="display:none; text-align: center;">
+            <h3 style="color: #10b981;">Kết quả đoạn Skin</h3>
             <canvas id="cropCanvas"></canvas>
         </div>
     </div>
-</div>
+
+    <div class="sidebar-right">
+        <h3>Kho Ảnh Hệ Thống</h3>
+        <input type="text" id="searchInput" class="search-box" placeholder="Tìm tên tướng (ví dụ: sin)..." oninput="renderKhoAnh()">
+        
+        <div class="kho-anh-list" id="khoAnhContainer">
+            </div>
+    </div>
 
 <script>
-    const upload = document.getElementById('upload');
+    // 1. DANH SÁCH ẢNH (Dựa trên folder 'sines' của bạn trên GitHub)
+    const folderPath = "images/sines/";
+    const danhSachAnh = [
+        "Sinestrea Điệp viên cánh cụt.png",
+        "Sinestrea Giấc mộng biển xanh.png",
+        "Sinestrea Lữ khách sa mạc.png",
+        "Sinestrea Nữ quỷ say ngủ.png",
+        "Sinestrea S-Quang vinh.png",
+        "Sinestrea Tiểu thư băng giá.png",
+        "Sinestrea WaVe.png",
+        "Sinestrea Đại tiểu thư.png"
+    ];
+
     const mainCanvas = document.getElementById('mainCanvas');
     const cropCanvas = document.getElementById('cropCanvas');
+    const upload = document.getElementById('upload');
+    const khoAnhContainer = document.getElementById('khoAnhContainer');
     const btnDownload = document.getElementById('btn-download');
-    const resultContainer = document.getElementById('resultContainer');
-    const heroDisplay = document.getElementById('hero-display');
+    const resultArea = document.getElementById('resultArea');
+
     let originalImg = new Image();
 
-    function updatePath() {
-        heroDisplay.innerText = document.getElementById('heroName').value || "Tên_Tướng";
+    // 2. HÀM HIỂN THỊ KHO ẢNH (Đây là phần fix lỗi mất ảnh)
+    function renderKhoAnh() {
+        const filter = document.getElementById('searchInput').value.toLowerCase();
+        khoAnhContainer.innerHTML = ""; // Xóa để vẽ lại
+
+        danhSachAnh.forEach(fileName => {
+            if (fileName.toLowerCase().includes(filter)) {
+                const img = document.createElement('img');
+                // Quan trọng: dùng encodeURIComponent để xử lý dấu tiếng Việt và khoảng trắng
+                img.src = folderPath + encodeURIComponent(fileName);
+                img.className = "thumb-item";
+                img.title = fileName;
+                img.onclick = () => loadImgToCrop(img.src);
+                khoAnhContainer.appendChild(img);
+            }
+        });
     }
 
-    upload.addEventListener('change', function(e) {
+    // Nạp ảnh khi click vào kho ảnh
+    function loadImgToCrop(src) {
+        originalImg.src = src;
+    }
+
+    // 3. XỬ LÝ KHI TẢI FILE LÊN
+    upload.addEventListener('change', (e) => {
         const reader = new FileReader();
-        reader.onload = function(event) {
-            originalImg.src = event.target.result;
-        }
+        reader.onload = (event) => { originalImg.src = event.target.result; };
         reader.readAsDataURL(e.target.files[0]);
     });
 
     originalImg.onload = function() {
-        renderMain();
-        resultContainer.style.display = 'none';
+        drawMain();
+        resultArea.style.display = 'none';
         btnDownload.style.display = 'none';
     };
 
-    function renderMain() {
+    function drawMain() {
         const ctx = mainCanvas.getContext('2d');
         mainCanvas.width = originalImg.width;
         mainCanvas.height = originalImg.height;
         ctx.drawImage(originalImg, 0, 0);
     }
 
+    // 4. HÀM CẮT ẢNH
     function processCrop() {
-        if (!originalImg.src) return alert("Bạn chưa chọn ảnh!");
+        if (!originalImg.src) return alert("Vui lòng chọn ảnh!");
 
         const x = parseInt(document.getElementById('x').value);
         const y = parseInt(document.getElementById('y').value);
         const w = parseInt(document.getElementById('w').value);
         const h = parseInt(document.getElementById('h').value);
 
-        // Vẽ lại ảnh gốc và khung đỏ
-        renderMain();
+        // Vẽ lại ảnh gốc + khung đỏ chỉ định vùng cắt
+        drawMain();
         const mainCtx = mainCanvas.getContext('2d');
-        mainCtx.strokeStyle = "#ff0000";
-        mainCtx.lineWidth = 8;
+        mainCtx.strokeStyle = "red";
+        mainCtx.lineWidth = 10;
         mainCtx.strokeRect(x, y, w, h);
 
-        // Cắt ảnh
+        // Thực hiện cắt vào canvas nhỏ
         const cropCtx = cropCanvas.getContext('2d');
         cropCanvas.width = w;
         cropCanvas.height = h;
         cropCtx.drawImage(originalImg, x, y, w, h, 0, 0, w, h);
-// Giả sử đây là mảng chứa kho ảnh hệ thống của bạn
-let khoAnhHeThong = []; 
 
-// Hàm này giúp lưu lại danh sách ảnh ban đầu
-function loadKhoAnh() {
-    // Đoạn code bạn dùng để quét thư mục sines/...
-    // Đảm bảo không làm trống mảng này khi thực hiện hàm cắt
-}
-
-function processCrop() {
-    if (!originalImg.src) return alert("Bạn chưa chọn ảnh!");
-
-    const x = parseInt(document.getElementById('x').value);
-    const y = parseInt(document.getElementById('y').value);
-    const w = parseInt(document.getElementById('w').value);
-    const h = parseInt(document.getElementById('h').value);
-
-    // VẼ KẾT QUẢ CẮT
-    const cropCtx = cropCanvas.getContext('2d');
-    cropCanvas.width = w;
-    cropCanvas.height = h;
-    cropCtx.drawImage(originalImg, x, y, w, h, 0, 0, w, h);
-
-    // QUAN TRỌNG: Hiển thị kết quả nhưng KHÔNG reset kho ảnh
-    resultContainer.style.display = 'block';
-    btnDownload.style.display = 'block';
-
-    // Fix lỗi: Sau khi cắt xong, gọi lại hàm hiển thị kho ảnh bên phải
-    renderKhoAnhRightPanel(); 
-}
-
-function renderKhoAnhRightPanel() {
-    // Hàm này vẽ lại danh sách ảnh ở cột "KHO ẢNH HỆ THỐNG"
-    // Đảm bảo ID 'kho-anh' không bị innerHTML = '' mà không có dữ liệu bù vào
-}
-        if (typeof renderKhoAnh === "function") {
-        renderKhoAnh(); 
-    }
-        // Hiện vùng kết quả
-        resultContainer.style.display = 'block';
+        // Hiển thị kết quả
+        resultArea.style.display = 'block';
         btnDownload.style.display = 'block';
         
-        // Cuộn xuống để xem kết quả
-        resultContainer.scrollIntoView({ behavior: 'smooth' });
+        // ĐẢM BẢO KHO ẢNH KHÔNG BỊ MẤT
+        // (Không cần gọi lại render vì ta không làm mới trang)
     }
-resultContainer.style.display = 'block';
-    btnDownload.style.display = 'block';
+
     function downloadImage() {
-        const name = document.getElementById('heroName').value || ' tướng';
         const link = document.createElement('a');
-        link.download = `Skin_${name}.png`;
-        link.href = cropCanvas.toDataURL('image/png');
+        link.download = 'skin_da_cat.png';
+        link.href = cropCanvas.toDataURL();
         link.click();
     }
-</script>
 
+    // Chạy nạp kho ảnh ngay khi mở web
+    renderKhoAnh();
+</script>
 </body>
 </html>
-
